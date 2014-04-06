@@ -13,6 +13,9 @@ JSONEditor.defaults.editors.enum = JSONEditor.AbstractEditor.extend({
     this.display_area.style.display = 'none';
     this.theme.disableHeader(this.title);
   },
+  getNumColumns: function() {
+    return 4;
+  },
   build: function() {
     var container = this.getContainer();
     this.title = this.getTheme().getHeader(this.getTitle());

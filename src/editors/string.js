@@ -62,6 +62,10 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     if(this.description) this.description.style.display = '';
     this.theme.enableLabel(this.label);
   },
+  getNumColumns: function() {
+    if(this.input_type === 'textarea') return 6;
+    return 4;
+  },
   build: function() {
     var self = this;
     if(!this.getOption('compact',false)) this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
@@ -208,7 +212,7 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
           'yaml'
         ].indexOf(this.format) >= 0
       ) {
-        this.input_type = this.format;
+        this.input_type = 'textarea';
         this.source_code = true;
         
         this.input = this.theme.getTextareaInput();

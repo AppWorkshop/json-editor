@@ -19,6 +19,9 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
     this.value = sanitized;
     this.jsoneditor.notifyWatchers(this.path);
   },
+  getNumColumns: function() {
+    return 4;
+  },
   typecast: function(value) {
     if(this.schema.type === "boolean") {
       return !!value;

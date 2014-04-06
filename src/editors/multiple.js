@@ -12,6 +12,9 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
     }
     this._super();
   },
+  getNumColumns: function() {
+    return 6;
+  },
   enable: function() {
     if(this.editors) {
       for(var i=0; i<this.editors.length; i++) {

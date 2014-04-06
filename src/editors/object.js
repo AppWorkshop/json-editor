@@ -120,12 +120,21 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       this.error_holder = document.createElement('div');
       this.container.appendChild(this.error_holder);
       this.editor_holder = this.getTheme().getIndentedPanel();
+      //is.editor_holder.className += " container";
+      this.editor_holder.style.paddingBottom = '0';
       this.container.appendChild(this.editor_holder);
 
+      var col_count = 0;
+      var current_row = document.createElement('div');
+      current_row.className = 'row';
+      this.editor_holder.appendChild(current_row);
+
+      var last_key;
+      var editor_columns = {};
       $each(this.schema.properties, function(key,schema) {
         var editor = self.jsoneditor.getEditorClass(schema, self.jsoneditor);
         var holder = self.getTheme().getChildEditorHolder();
-        self.editor_holder.appendChild(holder);
+        current_row.appendChild(holder);
 
         // If the property is required
         var required;
@@ -141,6 +150,27 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
           parent: self,
           required: required
         });
+        
+        col_count += self.editors[key].getNumColumns();
+        if(col_count > 12) {
+          if(last_key) {
+            editor_columns[last_key] = 12-(col_count-self.editors[key].getNumColumns());
+          }
+          col_count = self.editors[key].getNumColumns();
+          current_row = document.createElement('div');
+          current_row.className = 'row';
+          self.editor_holder.appendChild(current_row);
+          current_row.appendChild(holder);
+        }
+        last_key = key;
+        
+        
+        editor_columns[key] = self.editors[key].getNumColumns();
+      });
+      if(last_key && col_count < 12) editor_columns[last_key] += (12-col_count);
+      
+      $each(editor_columns,function(key,cols) {
+        self.editors[key].container.className += " columns medium-"+cols;
       });
 
       // Control buttons

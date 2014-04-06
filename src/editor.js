@@ -19,6 +19,9 @@ JSONEditor.AbstractEditor = Class.extend({
     if(!this.jsoneditor) return;
     this.jsoneditor.unregisterEditor(this);
   },
+  getNumColumns: function() {
+    return 12;
+  },
   init: function(options) {
     var self = this;
     this.container = options.container;
