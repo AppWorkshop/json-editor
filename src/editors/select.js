@@ -20,7 +20,7 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
     this.jsoneditor.notifyWatchers(this.path);
   },
   getNumColumns: function() {
-    return 4;
+    return 3;
   },
   typecast: function(value) {
     if(this.schema.type === "boolean") {

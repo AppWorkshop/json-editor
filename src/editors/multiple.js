@@ -13,7 +13,7 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
     this._super();
   },
   getNumColumns: function() {
-    return 6;
+    return this.editors[this.type].getNumColumns();
   },
   enable: function() {
     if(this.editors) {
@@ -44,6 +44,9 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
   build: function() {
     var self = this;
     var container = this.container;
+
+    this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
+    this.container.appendChild(this.header);
 
     this.types = [];
     
@@ -105,9 +108,11 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
       else self.jsoneditor.onChange();
     })
     this.switcher.style.marginBottom = 0;
-    this.switcher.style.float = 'right';
+    this.switcher.style.width = 'auto';
+    this.switcher.style.display = 'inline-block';
+    this.switcher.style.marginLeft = '5px';
 
-    this.editor_holder = this.theme.getIndentedPanel();
+    this.editor_holder = document.createElement('div');
     container.appendChild(this.editor_holder);
     this.type = 0;
 
@@ -149,6 +154,7 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
         parent: self,
         required: true
       });
+      if(self.editors[i].header) self.editors[i].header.style.display = 'none';
       
       self.editors[i].option = options[option];
       
@@ -167,7 +173,10 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
     this.register();
   },
   onChildEditorChange: function(editor) {
-    if(this.editors[this.type]) this.refreshValue();
+    if(this.editors[this.type]) {
+      this.refreshHeaderText();
+      this.refreshValue();
+    }
     
     this._super();
   },
@@ -179,8 +188,7 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
     var display_text = this.getDisplayText(schemas);
     $each(this.editors, function(i,editor) {
       if(editor.option) {
-        editor.option.innerHTML = '';
-        editor.option.appendChild(document.createTextNode(display_text[i]));
+        editor.option.textContent = display_text[i];
       }
     });
   },

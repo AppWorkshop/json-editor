@@ -2,8 +2,11 @@ JSONEditor.defaults.themes.bootstrap3 = JSONEditor.AbstractTheme.extend({
   getSelectInput: function(options) {
     var el = this._super(options);
     el.className += 'form-control';
-    el.style.width = 'auto';
+    //el.style.width = 'auto';
     return el;
+  },
+  setGridColumnSize: function(el,size) {
+    el.className = 'col-md-'+size;
   },
   afterInputReady: function(input) {
     if(input.controlgroup) return;

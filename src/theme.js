@@ -9,6 +9,22 @@ JSONEditor.AbstractTheme = Class.extend({
     el.style['margin-left'] = '10px';
     return el;
   },
+  getGridContainer: function() {
+    var el = document.createElement('div');
+    return el;
+  },
+  getGridRow: function() {
+    var el = document.createElement('div');
+    el.className = 'row';
+    return el;
+  },
+  getGridColumn: function() {
+    var el = document.createElement('div');
+    return el;
+  },
+  setGridColumnSize: function(el,size) {
+    
+  },
   getLink: function(text) {
     var el = document.createElement('a');
     el.setAttribute('href','#');

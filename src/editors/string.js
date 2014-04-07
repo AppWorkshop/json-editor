@@ -64,7 +64,8 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
   },
   getNumColumns: function() {
     if(this.input_type === 'textarea') return 6;
-    return 4;
+    else if(['text','email'].indexOf(this.input_type) >= 0) return 4;
+    else return 2;
   },
   build: function() {
     var self = this;

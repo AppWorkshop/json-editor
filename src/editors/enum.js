@@ -18,7 +18,7 @@ JSONEditor.defaults.editors.enum = JSONEditor.AbstractEditor.extend({
   },
   build: function() {
     var container = this.getContainer();
-    this.title = this.getTheme().getHeader(this.getTitle());
+    this.title = this.header = this.label = this.getTheme().getFormInputLabel(this.getTitle());
     this.container.appendChild(this.title);
 
     this.options.enum_titles = this.options.enum_titles || [];
@@ -37,7 +37,9 @@ JSONEditor.defaults.editors.enum = JSONEditor.AbstractEditor.extend({
     // Switcher
     this.switcher = this.theme.getSelectInput(this.select_options);
     this.container.appendChild(this.switcher);
-    this.switcher.style.float = 'right';
+    this.switcher.style.width = 'auto';
+    this.switcher.style.display = 'inline-block';
+    this.switcher.style.marginLeft = '5px';
     this.switcher.style.marginBottom = 0;
 
     // Display area

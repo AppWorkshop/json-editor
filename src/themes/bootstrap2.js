@@ -3,10 +3,33 @@ JSONEditor.defaults.themes.bootstrap2 = JSONEditor.AbstractTheme.extend({
     // TODO: use bootstrap slider
     return this._super(min, max, step);
   },
+  getGridContainer: function() {
+    var el = document.createElement('div');
+    el.className = 'container-fluid';
+    return el;
+  },
+  getGridRow: function() {
+    var el = document.createElement('div');
+    el.className = 'row-fluid';
+    return el;
+  },
+  getFormInputLabel: function(text) {
+    var el = this._super(text);
+    el.style.display = 'inline-block';
+    return el;
+  },
+  setGridColumnSize: function(el,size) {
+    el.className = 'span'+size;
+  },
   getSelectInput: function(options) {
     var input = this._super(options);
-    input.style.width = 'auto';
+    input.style.width = '100%';
     return input;
+  },
+  getFormInputField: function(type) {
+    var el = this._super(type);
+    el.style.width = '100%';
+    return el;
   },
   afterInputReady: function(input) {
     if(input.controlgroup) return;
