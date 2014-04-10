@@ -286,18 +286,6 @@ JSONEditor.AbstractEditor = Class.extend({
       }
     }
   },
-  addProperty: function() {
-    this.property_removed = false;
-    this.register();
-    this.addremove.innerHTML = '';
-    this.addremove.appendChild(document.createTextNode('remove '+this.getTitle()));
-  },
-  removeProperty: function() {
-    this.property_removed = true;
-    this.unregister();
-    this.addremove.innerHTML = '';
-    this.addremove.appendChild(document.createTextNode('add '+this.getTitle()));
-  },
   build: function() {
 
   },
