@@ -106,8 +106,9 @@ JSONEditor.defaults.themes.bootstrap3 = JSONEditor.AbstractTheme.extend({
     input.controlgroup.className = input.controlgroup.className.replace(/\s?has-error/g,'');
   },
   getTabHolder: function() {
-    var el = this._super();
-    el.children[0].className += ' list-group';
+    var el = document.createElement('div');
+    el.innerHTML = "<div class='tabs list-group col-md-2'></div><div class='col-md-10'></div>";
+    el.className = 'rows';
     return el;
   },
   getTab: function(text) {
