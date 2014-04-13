@@ -54,6 +54,7 @@ JSONEditor.defaults.themes.jqueryui = JSONEditor.AbstractTheme.extend({
   getFormInputLabel: function(text) {
     var el = document.createElement('label');
     el.style.marginRight = '5px';
+    el.style.fontWeight = 'bold';
     el.textContent = text;
     return el;
   },
@@ -119,6 +120,7 @@ JSONEditor.defaults.themes.jqueryui = JSONEditor.AbstractTheme.extend({
     var el = document.createElement('div');
     el.className = 'ui-widget-content ui-corner-all';
     el.style.padding = '1em 1.4em';
+    el.style.marginBottom = '20px';
     return el;
   },
   afterInputReady: function(input) {

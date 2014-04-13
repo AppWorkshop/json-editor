@@ -16,6 +16,7 @@ JSONEditor.defaults.themes.bootstrap2 = JSONEditor.AbstractTheme.extend({
   getFormInputLabel: function(text) {
     var el = this._super(text);
     el.style.display = 'inline-block';
+    el.style.fontWeight = 'bold';
     return el;
   },
   setGridColumnSize: function(el,size) {
@@ -23,12 +24,13 @@ JSONEditor.defaults.themes.bootstrap2 = JSONEditor.AbstractTheme.extend({
   },
   getSelectInput: function(options) {
     var input = this._super(options);
-    input.style.width = '100%';
+    input.style.width = 'auto';
+    input.style.maxWidth = '98%';
     return input;
   },
   getFormInputField: function(type) {
     var el = this._super(type);
-    el.style.width = '100%';
+    el.style.width = '98%';
     return el;
   },
   afterInputReady: function(input) {

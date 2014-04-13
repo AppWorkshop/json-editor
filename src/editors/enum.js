@@ -35,7 +35,7 @@ JSONEditor.defaults.editors.enum = JSONEditor.AbstractEditor.extend({
     }
 
     // Switcher
-    this.switcher = this.theme.getSelectInput(this.select_options);
+    this.switcher = this.theme.getSwitcher(this.select_options);
     this.container.appendChild(this.switcher);
     this.switcher.style.width = 'auto';
     this.switcher.style.display = 'inline-block';

@@ -80,6 +80,21 @@ JSONEditor.AbstractTheme = Class.extend({
     if(options) this.setSelectOptions(select, options);
     return select;
   },
+  getSwitcher: function(options) {
+    var switcher = this.getSelectInput(options);
+    switcher.style.backgroundColor = 'transparent';
+    switcher.style.height = 'auto';
+    switcher.style.fontStyle = 'italic';
+    switcher.style.fontWeight = 'normal';
+    switcher.style.padding = '0 0 0 3px';
+    return switcher;
+  },
+  getSwitcherOptions: function(switcher) {
+    return switcher.getElementsByTagName('option');
+  },
+  setSwitcherOptions: function(switcher, options, titles) {
+    this.setSelectOptions(switcher, options, titles);
+  },
   setSelectOptions: function(select, options, titles) {
     titles = titles || [];
     select.innerHTML = '';

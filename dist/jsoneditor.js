@@ -1830,9 +1830,14 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     this.theme.enableLabel(this.label);
   },
   getNumColumns: function() {
-    if(this.input_type === 'textarea') return 6;
-    else if(['text','email'].indexOf(this.input_type) >= 0) return 4;
-    else return 2;
+    var min = Math.ceil(this.getTitle().length/5);
+    var num;
+    
+    if(this.input_type === 'textarea') num = 6;
+    else if(['text','email'].indexOf(this.input_type) >= 0) num = 4;
+    else num = 2;
+    
+    return Math.min(12,Math.max(min,num));
   },
   build: function() {
     var self = this;
@@ -2380,7 +2385,6 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     if(this.addproperty_button) this.addproperty_button.disabled = true;
     this.hideEditJSON();
     
-    
     this._super();
     if(this.editors) {
       for(var i in this.editors) {
@@ -2391,81 +2395,94 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
   },
   layoutEditors: function() {
     var self = this;
-    var rows = [];
-    $each(this.editors, function(key,editor) {
-      if(editor.property_removed) return;
-      var found = false;
-      var width = editor.getNumColumns();
-      var height = editor.container.offsetHeight;
-      // See if the editor will fit in any of the existing rows first
-      for(var i=0; i<rows.length; i++) {
-        // If the editor will fit in the row horizontally
-        if(rows[i].width + width <= 12) {
-          // If the editor is close to the other elements in height
-          // i.e. Don't put a really tall editor in an otherwise short row or vice versa
-          if(!height || (rows[i].minh*.5 < height && rows[i].maxh*2 > height)) {
-            found = i;
-            continue;
+    
+    var container;
+    
+    if(this.format === 'grid') {
+      var rows = [];
+      $each(this.editors, function(key,editor) {
+        if(editor.property_removed) return;
+        var found = false;
+        var width = editor.getNumColumns();
+        var height = editor.container.offsetHeight;
+        // See if the editor will fit in any of the existing rows first
+        for(var i=0; i<rows.length; i++) {
+          // If the editor will fit in the row horizontally
+          if(rows[i].width + width <= 12) {
+            // If the editor is close to the other elements in height
+            // i.e. Don't put a really tall editor in an otherwise short row or vice versa
+            if(!height || (rows[i].minh*.5 < height && rows[i].maxh*2 > height)) {
+              found = i;
+              continue;
+            }
           }
         }
-      }
-      
-      // If there isn't a spot in any of the existing rows, start a new row
-      if(found === false) {
-        rows.push({
-          width: 0,
-          minh: 999999,
-          maxh: 0,
-          editors: []
-        });
-        found = rows.length-1;
-      }
-      
-      rows[found].editors.push({
-        key: key,
-        //editor: editor,
-        width: width,
-        height: height
-      });
-      rows[found].width += width;
-      rows[found].minh = Math.min(rows[found].minh,height);
-      rows[found].maxh = Math.max(rows[found].maxh,height);
-    });
-    
-    // Make almost full rows width 12
-    // Do this by increasing all editors' sizes proprotionately
-    // Any left over space goes to the biggest editor
-    // Don't touch rows with a width of 6 or less
-    for(var i=0; i<rows.length; i++) {
-      if(rows[i].width < 12 && rows[i].width > 6) {
-        var biggest = false;
-        var new_width = 0;
-        for(var j=0; j<rows[i].editors.length; j++) {
-          if(biggest === false) biggest = j;
-          else if(rows[i].editors[j].width > rows[i].editors[biggest].width) biggest = j;
-          rows[i].editors[j].width *= 12/rows[i].width;
-          rows[i].editors[j].width = Math.floor(rows[i].editors[j].width);
-          new_width += rows[i].editors[j].width;
+        
+        // If there isn't a spot in any of the existing rows, start a new row
+        if(found === false) {
+          rows.push({
+            width: 0,
+            minh: 999999,
+            maxh: 0,
+            editors: []
+          });
+          found = rows.length-1;
         }
-        if(new_width < 12) rows[i].editors[biggest].width += 12-new_width;
-        rows[i].width = 12;
+        
+        rows[found].editors.push({
+          key: key,
+          //editor: editor,
+          width: width,
+          height: height
+        });
+        rows[found].width += width;
+        rows[found].minh = Math.min(rows[found].minh,height);
+        rows[found].maxh = Math.max(rows[found].maxh,height);
+      });
+      
+      // Make almost full rows width 12
+      // Do this by increasing all editors' sizes proprotionately
+      // Any left over space goes to the biggest editor
+      // Don't touch rows with a width of 6 or less
+      for(var i=0; i<rows.length; i++) {
+        if(rows[i].width < 12) {
+          var biggest = false;
+          var new_width = 0;
+          for(var j=0; j<rows[i].editors.length; j++) {
+            if(biggest === false) biggest = j;
+            else if(rows[i].editors[j].width > rows[i].editors[biggest].width) biggest = j;
+            rows[i].editors[j].width *= 12/rows[i].width;
+            rows[i].editors[j].width = Math.floor(rows[i].editors[j].width);
+            new_width += rows[i].editors[j].width;
+          }
+          if(new_width < 12) rows[i].editors[biggest].width += 12-new_width;
+          rows[i].width = 12;
+        }
+      }
+      
+      // layout hasn't changed
+      if(this.layout === JSON.stringify(rows)) return false;
+      this.layout = JSON.stringify(rows);
+      
+      // Layout the form
+      container = document.createElement('div');
+      for(var i=0; i<rows.length; i++) {
+        var row = this.theme.getGridRow();
+        container.appendChild(row);
+        for(var j=0; j<rows[i].editors.length; j++) {
+          var editor = this.editors[rows[i].editors[j].key];
+          this.theme.setGridColumnSize(editor.container,rows[i].editors[j].width);
+          row.appendChild(editor.container);
+        }
       }
     }
-    
-    // layout hasn't changed
-    if(this.layout === JSON.stringify(rows)) return false;
-    this.layout = JSON.stringify(rows);
-    
-    // Layout the form
-    var container = document.createElement('div');
-    for(var i=0; i<rows.length; i++) {
-      var row = this.theme.getGridRow();
-      container.appendChild(row);
-      for(var j=0; j<rows[i].editors.length; j++) {
-        var editor = this.editors[rows[i].editors[j].key];
-        this.theme.setGridColumnSize(editor.container,rows[i].editors[j].width);
-        row.appendChild(editor.container);
-      }
+    // Normal layout
+    else {
+      container = document.createElement('div');
+      $each(this.editors, function(key,editor) {
+        if(editor.property_removed) return;
+        container.appendChild(editor.container);
+      });
     }
     this.row_container.innerHTML = '';
     this.row_container.appendChild(container);
@@ -2473,6 +2490,8 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
   build: function() {
     this.editors = {};
     var self = this;
+    
+    this.format = this.getOption('layout') || this.schema.format || this.jsoneditor.options.object_layout || 'normal';
 
     this.schema.properties = this.schema.properties || {};
 
@@ -4088,7 +4107,7 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
     this._super();
   },
   getNumColumns: function() {
-    return this.editors[this.type].getNumColumns();
+    return Math.max(this.editors[this.type].getNumColumns(),4);
   },
   enable: function() {
     if(this.editors) {
@@ -4158,7 +4177,7 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
     
     this.display_text = this.getDisplayText(this.types);
 
-    this.switcher = this.theme.getSelectInput(this.display_text);
+    this.switcher = this.theme.getSwitcher(this.display_text);
     container.appendChild(this.switcher);
     this.switcher.addEventListener('change',function(e) {
       e.preventDefault();
@@ -4193,7 +4212,7 @@ JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
 
     this.editors = [];
     this.validators = [];
-    var options = this.switcher.getElementsByTagName('option');
+    var options = this.theme.getSwitcherOptions(this.switcher);
     var option = 0;
     $each(this.types,function(i,type) {
       var holder = self.theme.getChildEditorHolder();
@@ -4360,7 +4379,7 @@ JSONEditor.defaults.editors.enum = JSONEditor.AbstractEditor.extend({
     }
 
     // Switcher
-    this.switcher = this.theme.getSelectInput(this.select_options);
+    this.switcher = this.theme.getSwitcher(this.select_options);
     this.container.appendChild(this.switcher);
     this.switcher.style.width = 'auto';
     this.switcher.style.display = 'inline-block';
@@ -4492,7 +4511,11 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
     this.jsoneditor.notifyWatchers(this.path);
   },
   getNumColumns: function() {
-    return 3;
+    var longest_text = this.getTitle().length;
+    for(var i=0; i<this.enum_options.length; i++) {
+      longest_text = Math.max(longest_text,this.enum_options[i].length)+4;
+    }
+    return Math.min(12,Math.max(longest_text/5,2));
   },
   typecast: function(value) {
     if(this.schema.type === "boolean") {
@@ -4687,6 +4710,21 @@ JSONEditor.AbstractTheme = Class.extend({
     var select = document.createElement('select');
     if(options) this.setSelectOptions(select, options);
     return select;
+  },
+  getSwitcher: function(options) {
+    var switcher = this.getSelectInput(options);
+    switcher.style.backgroundColor = 'transparent';
+    switcher.style.height = 'auto';
+    switcher.style.fontStyle = 'italic';
+    switcher.style.fontWeight = 'normal';
+    switcher.style.padding = '0 0 0 3px';
+    return switcher;
+  },
+  getSwitcherOptions: function(switcher) {
+    return switcher.getElementsByTagName('option');
+  },
+  setSwitcherOptions: function(switcher, options, titles) {
+    this.setSelectOptions(switcher, options, titles);
   },
   setSelectOptions: function(select, options, titles) {
     titles = titles || [];
@@ -4917,6 +4955,7 @@ JSONEditor.defaults.themes.bootstrap2 = JSONEditor.AbstractTheme.extend({
   getFormInputLabel: function(text) {
     var el = this._super(text);
     el.style.display = 'inline-block';
+    el.style.fontWeight = 'bold';
     return el;
   },
   setGridColumnSize: function(el,size) {
@@ -4924,12 +4963,13 @@ JSONEditor.defaults.themes.bootstrap2 = JSONEditor.AbstractTheme.extend({
   },
   getSelectInput: function(options) {
     var input = this._super(options);
-    input.style.width = '100%';
+    input.style.width = 'auto';
+    input.style.maxWidth = '98%';
     return input;
   },
   getFormInputField: function(type) {
     var el = this._super(type);
-    el.style.width = '100%';
+    el.style.width = '98%';
     return el;
   },
   afterInputReady: function(input) {
@@ -5197,6 +5237,11 @@ JSONEditor.defaults.themes.foundation = JSONEditor.AbstractTheme.extend({
     el.style.marginTop = '3px';
     return el;
   },
+  getSwitcher: function(options) {
+    var el = this._super(options);
+    el.style.paddingRight = '8px';
+    return el;
+  },
   afterInputReady: function(input) {
     if(this.closest(input,'.compact')) {
       input.style.marginBottom = 0;
@@ -5211,6 +5256,7 @@ JSONEditor.defaults.themes.foundation = JSONEditor.AbstractTheme.extend({
   getFormInputField: function(type) {
     var el = this._super(type);
     el.style.width = '100%';
+    el.style.marginBottom = '12px';
     return el;
   },
   getFormInputDescription: function(text) {
@@ -5506,6 +5552,7 @@ JSONEditor.defaults.themes.jqueryui = JSONEditor.AbstractTheme.extend({
   getFormInputLabel: function(text) {
     var el = document.createElement('label');
     el.style.marginRight = '5px';
+    el.style.fontWeight = 'bold';
     el.textContent = text;
     return el;
   },
@@ -5571,6 +5618,7 @@ JSONEditor.defaults.themes.jqueryui = JSONEditor.AbstractTheme.extend({
     var el = document.createElement('div');
     el.className = 'ui-widget-content ui-corner-all';
     el.style.padding = '1em 1.4em';
+    el.style.marginBottom = '20px';
     return el;
   },
   afterInputReady: function(input) {

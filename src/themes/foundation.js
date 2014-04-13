@@ -12,6 +12,11 @@ JSONEditor.defaults.themes.foundation = JSONEditor.AbstractTheme.extend({
     el.style.marginTop = '3px';
     return el;
   },
+  getSwitcher: function(options) {
+    var el = this._super(options);
+    el.style.paddingRight = '8px';
+    return el;
+  },
   afterInputReady: function(input) {
     if(this.closest(input,'.compact')) {
       input.style.marginBottom = 0;
@@ -26,6 +31,7 @@ JSONEditor.defaults.themes.foundation = JSONEditor.AbstractTheme.extend({
   getFormInputField: function(type) {
     var el = this._super(type);
     el.style.width = '100%';
+    el.style.marginBottom = '12px';
     return el;
   },
   getFormInputDescription: function(text) {

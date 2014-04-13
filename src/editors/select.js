@@ -20,7 +20,11 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
     this.jsoneditor.notifyWatchers(this.path);
   },
   getNumColumns: function() {
-    return 3;
+    var longest_text = this.getTitle().length;
+    for(var i=0; i<this.enum_options.length; i++) {
+      longest_text = Math.max(longest_text,this.enum_options[i].length)+4;
+    }
+    return Math.min(12,Math.max(longest_text/5,2));
   },
   typecast: function(value) {
     if(this.schema.type === "boolean") {
