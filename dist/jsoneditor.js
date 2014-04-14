@@ -2381,9 +2381,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     }
   },
   disable: function() {
-    if(this.editjson_button) {
-      this.editjson_button.disabled = true;
-    }
+    if(this.editjson_button) this.editjson_button.disabled = true;
     if(this.addproperty_button) this.addproperty_button.disabled = true;
     this.hideEditJSON();
     
@@ -5071,7 +5069,7 @@ JSONEditor.defaults.themes.bootstrap2 = JSONEditor.AbstractTheme.extend({
   getTabHolder: function() {
     var el = document.createElement('div');
     el.className = 'tabbable tabs-left';
-    el.innerHTML = "<ul class='nav nav-tabs'></ul><div class='tab-content'></div>";
+    el.innerHTML = "<ul class='nav nav-tabs'></ul><div class='tab-content' style='overflow:visible;'></div>";
     return el;
   },
   getTab: function(text) {
