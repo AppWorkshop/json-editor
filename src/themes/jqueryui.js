@@ -30,12 +30,10 @@ JSONEditor.defaults.themes.jqueryui = JSONEditor.AbstractTheme.extend({
     return el;
   },
   getFormControl: function(label, input, description) {
-    var el = document.createElement('div');
-    el.className = 'form-control';
-    el.style.padding = '8px 0';
-    if(label) el.appendChild(label);
-    el.appendChild(input);
-    if(description) el.appendChild(description);
+    var el = this._super(label,input,description);
+    if(input.type !== 'checkbox') {
+      el.style.padding = '8px 0';
+    }
     return el;
   },
   getDescription: function(text) {

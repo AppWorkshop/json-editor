@@ -28,15 +28,21 @@ JSONEditor.defaults.themes.bootstrap3 = JSONEditor.AbstractTheme.extend({
   },
   getFormInputField: function(type) {
     var el = this._super(type);
-    el.className += 'form-control';
+    if(type !== 'checkbox') {
+      el.className += 'form-control';
+    }
+    else {
+      el.style.marginTop = '10px';
+    }
     return el;
   },
   getFormControl: function(label, input, description) {
     var group = document.createElement('div');
 
-    if(label && input.getAttribute('type') === 'checkbox') {
+    if(label && input.type === 'checkbox') {
       group.className += ' checkbox';
-      label.appendChild(input)
+      label.appendChild(input);
+      label.style.fontSize = '14px';
       group.appendChild(label);
     } 
     else {

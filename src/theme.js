@@ -73,7 +73,9 @@ JSONEditor.AbstractTheme = Class.extend({
     return el;
   },
   getCheckbox: function() {
-    return this.getFormInputField('checkbox');
+    var el = this.getFormInputField('checkbox');
+    el.style.float = "left";
+    return el;
   },
   getSelectInput: function(options) {
     var select = document.createElement('select');
@@ -130,9 +132,14 @@ JSONEditor.AbstractTheme = Class.extend({
   },
   getFormControl: function(label, input, description) {
     var el = document.createElement('div');
-    el.setAttribute('class','form-control');
     if(label) el.appendChild(label);
-    el.appendChild(input);
+    if(input.type === 'checkbox') {
+      label.appendChild(input);
+    }
+    else {
+      el.appendChild(input);
+    }
+    
     if(description) el.appendChild(description);
     return el;
   },

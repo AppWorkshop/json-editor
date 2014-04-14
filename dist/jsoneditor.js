@@ -2381,7 +2381,9 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     }
   },
   disable: function() {
-    if(this.editjson_button) this.editjson_button.disabled = true;
+    if(this.editjson_button) {
+      this.editjson_button.disabled = true;
+    }
     if(this.addproperty_button) this.addproperty_button.disabled = true;
     this.hideEditJSON();
     
@@ -2528,22 +2530,15 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       
       // Edit JSON modal
       this.editjson_holder = this.theme.getModal();
-      this.editjson_holder.style.height = '210px';
-      this.editjson_holder.style.width = '300px';
       this.editjson_textarea = this.theme.getTextareaInput();
       this.editjson_textarea.style.height = '170px';
-      this.editjson_textarea.style.width = '100%';
+      this.editjson_textarea.style.width = '300px';
+      this.editjson_textarea.style.display = 'block';
       this.editjson_save = this.getButton('Save','save','Save');
-      this.editjson_save.style.position = 'absolute';
-      this.editjson_save.style.bottom = '5px';
-      this.editjson_save.style.right = '5px';
       this.editjson_save.addEventListener('click',function() {
         self.saveJSON();
       });
       this.editjson_cancel = this.getButton('Cancel','cancel','Cancel');
-      this.editjson_cancel.style.position = 'absolute';
-      this.editjson_cancel.style.bottom = '5px';
-      this.editjson_cancel.style.left = '5px';
       this.editjson_cancel.addEventListener('click',function() {
         self.hideEditJSON();
       });
@@ -2553,8 +2548,6 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       
       // Manage Properties modal
       this.addproperty_holder = this.theme.getModal();
-      this.addproperty_holder.style.height = '200px';
-      this.addproperty_holder.style.width = '300px';
       this.addproperty_list = document.createElement('div');
       this.addproperty_list.style.width = '295px';
       this.addproperty_list.style.height = '160px';
@@ -2563,11 +2556,11 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       this.addproperty_list.style.overflowX = 'hidden';
       this.addproperty_list.style.paddingLeft = '5px';
       this.addproperty_add = this.getButton('add','add','add');
-      this.addproperty_add.style.float = 'right';
       this.addproperty_input = this.theme.getFormInputField('text');
       this.addproperty_input.setAttribute('placeholder','Property name...');
-      this.addproperty_input.style.width = '200px';
-      this.addproperty_input.style.float = 'left';
+      this.addproperty_input.style.width = '220px';
+      this.addproperty_input.style.marginBottom = '0';
+      this.addproperty_input.style.display = 'inline-block';
       this.addproperty_add.addEventListener('click',function() {
         if(self.addproperty_input.value) {
           if(self.editors[self.addproperty_input.value]) {
@@ -2583,8 +2576,11 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
         }
       });
       this.addproperty_holder.appendChild(this.addproperty_list);
-      this.addproperty_holder.appendChild(this.addproperty_add);
       this.addproperty_holder.appendChild(this.addproperty_input);
+      this.addproperty_holder.appendChild(this.addproperty_add);
+      var spacer = document.createElement('div');
+      spacer.style.clear = 'both';
+      this.addproperty_holder.appendChild(spacer);
       
       
       // Description
@@ -2699,10 +2695,12 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     this.disable();
     
     this.editjson_holder.style.display = '';
+    this.editjson_button.disabled = false;
     this.editing_json = true;
   },
   hideEditJSON: function() {
     if(!this.editjson_holder) return;
+    if(!this.editing_json) return;
     
     this.editjson_holder.style.display = 'none';
     this.enable();
@@ -2770,11 +2768,12 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     this.disable();
     
     this.adding_property = true;
-    
+    this.addproperty_button.disabled = false;
     this.addproperty_holder.style.display = '';
   },
   hideAddProperty: function() {
     if(!this.addproperty_holder) return;
+    if(!this.adding_property) return;
     
     this.addproperty_holder.style.display = 'none';
     this.enable();
@@ -4704,7 +4703,9 @@ JSONEditor.AbstractTheme = Class.extend({
     return el;
   },
   getCheckbox: function() {
-    return this.getFormInputField('checkbox');
+    var el = this.getFormInputField('checkbox');
+    el.style.float = "left";
+    return el;
   },
   getSelectInput: function(options) {
     var select = document.createElement('select');
@@ -4761,9 +4762,14 @@ JSONEditor.AbstractTheme = Class.extend({
   },
   getFormControl: function(label, input, description) {
     var el = document.createElement('div');
-    el.setAttribute('class','form-control');
     if(label) el.appendChild(label);
-    el.appendChild(input);
+    if(input.type === 'checkbox') {
+      label.appendChild(input);
+    }
+    else {
+      el.appendChild(input);
+    }
+    
     if(description) el.appendChild(description);
     return el;
   },
@@ -5125,15 +5131,21 @@ JSONEditor.defaults.themes.bootstrap3 = JSONEditor.AbstractTheme.extend({
   },
   getFormInputField: function(type) {
     var el = this._super(type);
-    el.className += 'form-control';
+    if(type !== 'checkbox') {
+      el.className += 'form-control';
+    }
+    else {
+      el.style.marginTop = '10px';
+    }
     return el;
   },
   getFormControl: function(label, input, description) {
     var group = document.createElement('div');
 
-    if(label && input.getAttribute('type') === 'checkbox') {
+    if(label && input.type === 'checkbox') {
       group.className += ' checkbox';
-      label.appendChild(input)
+      label.appendChild(input);
+      label.style.fontSize = '14px';
       group.appendChild(label);
     } 
     else {
@@ -5528,12 +5540,10 @@ JSONEditor.defaults.themes.jqueryui = JSONEditor.AbstractTheme.extend({
     return el;
   },
   getFormControl: function(label, input, description) {
-    var el = document.createElement('div');
-    el.className = 'form-control';
-    el.style.padding = '8px 0';
-    if(label) el.appendChild(label);
-    el.appendChild(input);
-    if(description) el.appendChild(description);
+    var el = this._super(label,input,description);
+    if(input.type !== 'checkbox') {
+      el.style.padding = '8px 0';
+    }
     return el;
   },
   getDescription: function(text) {

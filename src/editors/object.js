@@ -183,22 +183,15 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       
       // Edit JSON modal
       this.editjson_holder = this.theme.getModal();
-      this.editjson_holder.style.height = '210px';
-      this.editjson_holder.style.width = '300px';
       this.editjson_textarea = this.theme.getTextareaInput();
       this.editjson_textarea.style.height = '170px';
-      this.editjson_textarea.style.width = '100%';
+      this.editjson_textarea.style.width = '300px';
+      this.editjson_textarea.style.display = 'block';
       this.editjson_save = this.getButton('Save','save','Save');
-      this.editjson_save.style.position = 'absolute';
-      this.editjson_save.style.bottom = '5px';
-      this.editjson_save.style.right = '5px';
       this.editjson_save.addEventListener('click',function() {
         self.saveJSON();
       });
       this.editjson_cancel = this.getButton('Cancel','cancel','Cancel');
-      this.editjson_cancel.style.position = 'absolute';
-      this.editjson_cancel.style.bottom = '5px';
-      this.editjson_cancel.style.left = '5px';
       this.editjson_cancel.addEventListener('click',function() {
         self.hideEditJSON();
       });
@@ -208,8 +201,6 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       
       // Manage Properties modal
       this.addproperty_holder = this.theme.getModal();
-      this.addproperty_holder.style.height = '200px';
-      this.addproperty_holder.style.width = '300px';
       this.addproperty_list = document.createElement('div');
       this.addproperty_list.style.width = '295px';
       this.addproperty_list.style.height = '160px';
@@ -218,11 +209,11 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       this.addproperty_list.style.overflowX = 'hidden';
       this.addproperty_list.style.paddingLeft = '5px';
       this.addproperty_add = this.getButton('add','add','add');
-      this.addproperty_add.style.float = 'right';
       this.addproperty_input = this.theme.getFormInputField('text');
       this.addproperty_input.setAttribute('placeholder','Property name...');
-      this.addproperty_input.style.width = '200px';
-      this.addproperty_input.style.float = 'left';
+      this.addproperty_input.style.width = '220px';
+      this.addproperty_input.style.marginBottom = '0';
+      this.addproperty_input.style.display = 'inline-block';
       this.addproperty_add.addEventListener('click',function() {
         if(self.addproperty_input.value) {
           if(self.editors[self.addproperty_input.value]) {
@@ -238,8 +229,11 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
         }
       });
       this.addproperty_holder.appendChild(this.addproperty_list);
-      this.addproperty_holder.appendChild(this.addproperty_add);
       this.addproperty_holder.appendChild(this.addproperty_input);
+      this.addproperty_holder.appendChild(this.addproperty_add);
+      var spacer = document.createElement('div');
+      spacer.style.clear = 'both';
+      this.addproperty_holder.appendChild(spacer);
       
       
       // Description
@@ -354,10 +348,12 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     this.disable();
     
     this.editjson_holder.style.display = '';
+    this.editjson_button.disabled = false;
     this.editing_json = true;
   },
   hideEditJSON: function() {
     if(!this.editjson_holder) return;
+    if(!this.editing_json) return;
     
     this.editjson_holder.style.display = 'none';
     this.enable();
@@ -425,11 +421,12 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     this.disable();
     
     this.adding_property = true;
-    
+    this.addproperty_button.disabled = false;
     this.addproperty_holder.style.display = '';
   },
   hideAddProperty: function() {
     if(!this.addproperty_holder) return;
+    if(!this.adding_property) return;
     
     this.addproperty_holder.style.display = 'none';
     this.enable();
