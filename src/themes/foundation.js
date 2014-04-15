@@ -90,6 +90,11 @@ JSONEditor.defaults.themes.foundation3 = JSONEditor.defaults.themes.foundation.e
     el.style.fontSize = '.6em';
     return el;
   },
+  getFormInputLabel: function(text) {
+    var el = this._super(text);
+    el.style.fontWeight = 'bold';
+    return el;
+  },
   getTabHolder: function() {
     var el = document.createElement('div');
     el.className = 'row';
@@ -141,6 +146,11 @@ JSONEditor.defaults.themes.foundation4 = JSONEditor.defaults.themes.foundation.e
   getFormInputDescription: function(text) {
     var el = this._super(text);
     el.style.fontSize = '.8rem';
+    return el;
+  },
+  getFormInputLabel: function(text) {
+    var el = this._super(text);
+    el.style.fontWeight = 'bold';
     return el;
   }
 });

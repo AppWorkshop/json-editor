@@ -4385,6 +4385,8 @@ JSONEditor.defaults.editors.enum = JSONEditor.AbstractEditor.extend({
 
     // Display area
     this.display_area = this.theme.getIndentedPanel();
+    this.display_area.style.paddingTop = 0;
+    this.display_area.style.paddingBottom = 0;
     this.container.appendChild(this.display_area);
 
     this.switcher.addEventListener('change',function() {
@@ -4445,7 +4447,7 @@ JSONEditor.defaults.editors.enum = JSONEditor.AbstractEditor.extend({
         // Add the keys to object children
         if(!(el instanceof Array)) {
           // TODO: use theme
-          html = '<div><strong>'+i+'</strong>: '+html+'</div>';
+          html = '<div><em>'+i+'</em>: '+html+'</div>';
         }
 
         // TODO: use theme
@@ -4453,7 +4455,7 @@ JSONEditor.defaults.editors.enum = JSONEditor.AbstractEditor.extend({
       });
       
       if(el instanceof Array) ret = '<ol>'+ret+'</ol>';
-      else ret = "<ul>"+ret+'</ul>';
+      else ret = "<ul style='margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0;'>"+ret+'</ul>';
 
       return ret;
     }
@@ -5325,6 +5327,11 @@ JSONEditor.defaults.themes.foundation3 = JSONEditor.defaults.themes.foundation.e
     el.style.fontSize = '.6em';
     return el;
   },
+  getFormInputLabel: function(text) {
+    var el = this._super(text);
+    el.style.fontWeight = 'bold';
+    return el;
+  },
   getTabHolder: function() {
     var el = document.createElement('div');
     el.className = 'row';
@@ -5376,6 +5383,11 @@ JSONEditor.defaults.themes.foundation4 = JSONEditor.defaults.themes.foundation.e
   getFormInputDescription: function(text) {
     var el = this._super(text);
     el.style.fontSize = '.8rem';
+    return el;
+  },
+  getFormInputLabel: function(text) {
+    var el = this._super(text);
+    el.style.fontWeight = 'bold';
     return el;
   }
 });
