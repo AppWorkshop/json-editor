@@ -205,6 +205,22 @@ editor.on("change",  function() {
            schema: schema,
            object_layout: 'grid' 
         });
+    
+        // When the value of the editor changes, update the JSON output and validation message
+        jsoneditor.on('change',function() {
+            var json = jsoneditor.getValue();
+            
+            $output.value = JSON.stringify(json,null,2);
+            
+            var validation_errors = jsoneditor.validate();
+            // Show validation errors if there are any
+            if(validation_errors.length) {
+                $validate.value = JSON.stringify(validation_errors,null,2);
+            }
+            else {
+                $validate.value = 'valid';
+            }
+        });
     };
     reload();
     
@@ -230,24 +246,10 @@ editor.on("change",  function() {
        reload();
     });
     
-    // When the value of the editor changes, update the JSON output and validation message
-    jsoneditor.on('change',function() {
-        var json = jsoneditor.getValue();
-        
-        $output.value = JSON.stringify(json,null,2);
-        
-        var validation_errors = jsoneditor.validate();
-        // Show validation errors if there are any
-        if(validation_errors.length) {
-            $validate.value = JSON.stringify(validation_errors,null,2);
-        }
-        else {
-            $validate.value = 'valid';
-        }
-    });
-    
     // Set the theme by loading the right stylesheets
     var setTheme = function(theme) {
+        theme = theme || '';
+        
         var mapping = {
           html: '',  
           bootstrap2: '//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css',  
@@ -258,9 +260,15 @@ editor.on("change",  function() {
           jqueryui: '//code.jquery.com/ui/1.10.3/themes/south-street/jquery-ui.css',  
         };
         
+        if(typeof mapping[theme] === 'undefined') {
+            theme = 'bootstrap3';
+            document.getElementById('theme_switcher').value = theme;
+        }
+        
         JSONEditor.defaults.theme = theme;
         
         document.getElementById('theme_stylesheet').href = mapping[theme];
+        document.getElementById('theme_switcher').value = JSONEditor.defaults.theme;
         
         reload();
     };
@@ -268,6 +276,7 @@ editor.on("change",  function() {
     // Set the icontheme
     // Set the theme by loading the right stylesheets
     var setIconlib = function(iconlib) {
+        iconlib = iconlib || '';
         var mapping = { 
           foundation2: '//cdnjs.cloudflare.com/ajax/libs/foundicons/2.0/stylesheets/general_foundicons.css',  
           foundation3: '//cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css',  
@@ -277,22 +286,22 @@ editor.on("change",  function() {
         
         JSONEditor.defaults.iconlib = iconlib;
         
-        document.getElementById('icon_stylesheet').href = mapping[iconlib];
+        document.getElementById('icon_stylesheet').href = mapping[iconlib] || '';
+        document.getElementById('icon_switcher').value = JSONEditor.defaults.iconlib;
+        
         
         reload();
     };
     
     document.getElementById('theme_switcher').addEventListener('change',function() {
-       setTheme(this.value); 
+       setTheme(this.value,true); 
     });
     document.getElementById('icon_switcher').addEventListener('change',function() {
-       setIconlib(this.value); 
+       setIconlib(this.value,true); 
     });
     
-    setTheme('bootstrap2');
-    document.getElementById('theme_switcher').value = 'bootstrap2';
-    setIconlib('fontawesome4');
-    document.getElementById('icon_switcher').value = 'fontawesome4';
+    setTheme((window.location.href.match('[?&]theme=([^&]+)')||[])[1] || 'bootstrap2');
+    setIconlib((window.location.href.match('[?&]iconlib=([^&]+)')||[])[1] || 'fontawesome4');
 })();
 </script>
 </body>
