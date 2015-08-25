@@ -212,8 +212,6 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
                 var max = this.schema.maximum || Math.max(100, min + 1);
                 var step = 1;
 
-
-                console.log("Range slider: " + this.value);
                 if (this.schema.multipleOf) {
                     if (min % this.schema.multipleOf)
                         min = Math.ceil(min / this.schema.multipleOf) * this.schema.multipleOf;
