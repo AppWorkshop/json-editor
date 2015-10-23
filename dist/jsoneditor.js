@@ -4641,6 +4641,13 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
     this.add_row_button.addEventListener('click',function(e) {
       e.preventDefault();
       e.stopPropagation();
+      // Custom validation callback when the user hits the "add item" button.
+      if (self.schema.beforeAddValidationCallback && (typeof self.schema.beforeAddValidationCallback === "function")) {
+        if (!self.schema.beforeAddValidationCallback(self.rows)) {
+          // validation failed.
+          return;
+        }
+      }
       var i = self.rows.length;
       if(self.row_cache[i]) {
         self.rows[i] = self.row_cache[i];
