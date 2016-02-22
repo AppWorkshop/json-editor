@@ -303,7 +303,19 @@ JSONEditor.Validator = Class.extend({
               message: this.translate("error_notset")
             });
           }
+        } else if (schema.format &&
+          (schema.format === "datetime-local") &&
+          (schema.type === "string")) {
+          if (!value) {
+            // hasn't been selected.
+            errors.push({
+              path: path,
+              property: 'required',
+              message: this.translate("error_notset")
+            });
+          }
         }
+
 
       }
       // Value not defined
