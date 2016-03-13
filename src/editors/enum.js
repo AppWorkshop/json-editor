@@ -37,14 +37,16 @@ JSONEditor.defaults.editors.enum = JSONEditor.AbstractEditor.extend({
     
     if(this.options.hide_display) this.display_area.style.display = "none";
 
-    this.switcher.addEventListener('change',function() {
+    this.theme.attachHandlers(this.switcher, function() {
       self.selected = self.select_options.indexOf(this.value);
       self.value = self.enum[self.selected];
       self.refreshValue();
       self.onChange(true);
     });
+
     this.value = this.enum[0];
     this.refreshValue();
+    this.theme.afterRefresh(this.switcher);
 
     if(this.enum.length === 1) this.switcher.style.display = 'none';
   },

@@ -1,4 +1,8 @@
 JSONEditor.AbstractTheme = Class.extend({
+  // TODO: make all editors use this
+  attachHandlers: function(input, handler) {
+    input.addEventListener('change', handler);
+  },
   getContainer: function() {
     return document.createElement('div');
   },
@@ -165,6 +169,9 @@ JSONEditor.AbstractTheme = Class.extend({
       option.textContent = titles[i] || options[i];
       select.appendChild(option);
     }
+  },
+  setSelectValue: function(input) {
+
   },
   getTextareaInput: function() {
     var el = document.createElement('textarea');

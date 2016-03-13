@@ -322,30 +322,29 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
         }
       }
     }
-    this.input
-      .addEventListener('change',function(e) {        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Don't allow changing if this field is a template
-        if(self.schema.template) {
-          this.value = self.value;
-          return;
-        }
+    this.theme.attachHandlers(this.input, function(e) {
+      e.preventDefault();
+      e.stopPropagation();
 
-        var val = this.value;
-        
-        // sanitize value
-        var sanitized = self.sanitize(val);
-        if(val !== sanitized) {
-          this.value = sanitized;
-        }
-        
-        self.is_dirty = true;
+      // Don't allow changing if this field is a template
+      if(self.schema.template) {
+        this.value = self.value;
+        return;
+      }
 
-        self.refreshValue();
-        self.onChange(true);
-      });
+      var val = this.value;
+
+      // sanitize value
+      var sanitized = self.sanitize(val);
+      if(val !== sanitized) {
+        this.value = sanitized;
+      }
+
+      self.is_dirty = true;
+
+      self.refreshValue();
+      self.onChange(true);
+    });
 
     if(this.format) this.input.setAttribute('data-schemaformat',this.format);
     if (this.schema.information_only) {
@@ -361,7 +360,22 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     }
 
     this.control = this.theme.getFormControl(this.label, this.input, this.description, this.schema.info);
+
     this.container.appendChild(this.control);
+
+/*
+    // materialize date picker
+    if (this.format === 'date' && this.jsoneditor.options.theme === 'materialize' && !$isCordova()) {
+      $(this.input).pickadate({format: 'dd/mm/yyyy'});
+      this.input = $(this.control).find('input').get(0);
+      $(this.input).change(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        self.refreshValue();
+        self.onChange(true);
+      });
+    }
+*/
 
     // Any special formatting that needs to happen after the input is added to the dom
     window.requestAnimationFrame(function() {
