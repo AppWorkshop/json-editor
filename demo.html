@@ -16,13 +16,13 @@
   <body>
     <div class='container'>
       <div class='row'>
-        <div class='span8 col-md-8 columns eight large-8'>
+        <div class='span8 col-md-8 columns eight large-8 col m8'>
           <h2>Editor</h2>
           <p>Below is the editor generated from the JSON Schema.</p>
 
           <div id='editor'></div>
         </div>
-        <div class='span4 col-md-4 columns four large-4'>
+        <div class='span4 col-md-4 columns four large-4 col m4'>
           <div>
             <a href='#' id='direct_link'>Direct Link</a> (preserves schema, value, and options)
           </div>
@@ -35,7 +35,7 @@
           <div id='options_holder'>
             <div>
               <label>CSS Framework</label>
-              <select id='theme_switcher' class='form-control'>
+              <select id='theme_switcher' class='form-control browser-default'>
                 <option value='html'>None</option>
                 <option value='jqueryui'>jQuery UI</option>
                 <option value='bootstrap2'>Bootstrap 2</option>
@@ -43,11 +43,12 @@
                 <option value='foundation3'>Foundation 3</option>
                 <option value='foundation4'>Foundation 4</option>
                 <option value='foundation5'>Foundation 5</option>
+                <option value='materialize'>Materialize</option>
               </select>
             </div>
             <div>
               <label>Icon Library</label>
-              <select id='icon_switcher' class='form-control'>
+              <select id='icon_switcher' class='form-control browser-default'>
                 <option value=''>None</option>
                 <option value='jqueryui'>jQuery UI</option>
                 <option value='bootstrap2'>Bootstrap 2 Glyphicons</option>
@@ -60,14 +61,14 @@
             </div>
             <div>
               <label>Object Layout</label>
-              <select id='object_layout' class='form-control'>
+              <select id='object_layout' class='form-control browser-default'>
                 <option value='normal' selected="">normal</option>
                 <option value='grid'>grid</option>
               </select>
             </div>
             <div>
               <label>Show Errors</label>
-              <select id='show_errors' class='form-control'>
+              <select id='show_errors' class='form-control browser-default'>
                 <option value='interaction'>On Interaction</option>
                 <option value='change'>On Field Change</option>
                 <option value='always'  selected="selected">Always</option>
@@ -76,7 +77,7 @@
             </div>
             <div>
               <label>Boolean options</label>
-              <select multiple size=9 id='boolean_options' style='width: 100%;' class='form-control'>
+              <select multiple size=9 id='boolean_options' style='width: 100%;' class='form-control browser-default'>
                 <option value='required_by_default' selected="">Object properties required by default</option>
                 <option value='no_additional_properties'>No additional object properties</option>
                 <option value='ajax'>Allow loading schemas via Ajax</option>
@@ -95,7 +96,7 @@
           <textarea id='validate' style='width: 100%; height: 100px; font-family: monospace;' readonly disabled class='form-control'></textarea>
         </div>
         <div class='row'>
-          <div class='span12 col-md-12 columns twelve large-12'>
+          <div class='span12 col-md-12 columns twelve large-12 col m12'>
             <h2>Schema</h2>
             <p>You can change the schema and see how the generated form looks.  After you make changes, click <button class='btn btn-primary' id='setschema'>Update Schema</button></p>
 
@@ -103,7 +104,7 @@
           </div>
         </div>
         <div class='row'>
-          <div class='span12 col-md-12 columns twelve large-12'>
+          <div class='span12 col-md-12 columns twelve large-12 col m12'>
             <h2>Code</h2>
             <pre><code>// Set default options
 JSONEditor.defaults.options.theme = 'bootstrap2';
@@ -147,6 +148,7 @@ editor.on("change",  function() {
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.5/js/materialize.min.js"></script>
     <script src="http://szimek.github.io/signature_pad/js/signature_pad.js"></script>
     <script>
       (function () {
@@ -487,7 +489,8 @@ editor.on("change",  function() {
             foundation3: 'http://cdnjs.cloudflare.com/ajax/libs/foundation/3.2.5/stylesheets/foundation.css',
             foundation4: 'http://cdn.jsdelivr.net/foundation/4.3.2/css/foundation.min.css',
             foundation5: 'http://cdn.jsdelivr.net/foundation/5.0.2/css/foundation.min.css',
-            jqueryui: 'http://code.jquery.com/ui/1.10.3/themes/south-street/jquery-ui.css'
+            jqueryui: 'http://code.jquery.com/ui/1.10.3/themes/south-street/jquery-ui.css',
+            materialize: 'https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.5/css/materialize.min.css'
           };
 
           if (typeof mapping[theme] === 'undefined') {
