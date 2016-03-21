@@ -68,3 +68,6 @@ var $uuid = function() {
     return v.toString(16);
   });
 };
+var $isCordova = function() {
+  return typeof Meteor !== 'undefined' && Meteor.isCordova;
+};

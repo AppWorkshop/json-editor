@@ -33,6 +33,7 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
     if (this.select2)
       this.select2.select2('val', this.input.value);
     this.value = sanitized;
+    this.theme.setSelectValue(this.input);
     this.onChange();
   },
   register: function () {
@@ -196,14 +197,15 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
     multipleSelect = (this.schema.multiple) || false;
     this.input.multiple = multipleSelect;
 
-    this.input.addEventListener('change', function (e) {
+    this.control = this.theme.getFormControl(this.label, this.input, this.description, this.schema.info);
+
+    this.container.appendChild(this.control);
+
+    this.theme.attachHandlers(this.input, function(e) {
       e.preventDefault();
       e.stopPropagation();
       self.onInputChange();
     });
-
-    this.control = this.theme.getFormControl(this.label, this.input, this.description, this.schema.info);
-    this.container.appendChild(this.control);
 
     this.value = this.enum_values[0];
   },

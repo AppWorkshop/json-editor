@@ -202,7 +202,9 @@ var $uuid = function() {
     return v.toString(16);
   });
 };
-
+var $isCordova = function() {
+  return typeof Meteor !== 'undefined' && Meteor.isCordova;
+};
 var JSONEditor = function(element,options) {
   options = $extend({},JSONEditor.defaults.options,options||{});
   this.element = element;
@@ -2431,30 +2433,29 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
         }
       }
     }
-    this.input
-      .addEventListener('change',function(e) {        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Don't allow changing if this field is a template
-        if(self.schema.template) {
-          this.value = self.value;
-          return;
-        }
+    this.theme.attachHandlers(this.input, function(e) {
+      e.preventDefault();
+      e.stopPropagation();
 
-        var val = this.value;
-        
-        // sanitize value
-        var sanitized = self.sanitize(val);
-        if(val !== sanitized) {
-          this.value = sanitized;
-        }
-        
-        self.is_dirty = true;
+      // Don't allow changing if this field is a template
+      if(self.schema.template) {
+        this.value = self.value;
+        return;
+      }
 
-        self.refreshValue();
-        self.onChange(true);
-      });
+      var val = this.value;
+
+      // sanitize value
+      var sanitized = self.sanitize(val);
+      if(val !== sanitized) {
+        this.value = sanitized;
+      }
+
+      self.is_dirty = true;
+
+      self.refreshValue();
+      self.onChange(true);
+    });
 
     if(this.format) this.input.setAttribute('data-schemaformat',this.format);
     if (this.schema.information_only) {
@@ -2470,7 +2471,22 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     }
 
     this.control = this.theme.getFormControl(this.label, this.input, this.description, this.schema.info);
+
     this.container.appendChild(this.control);
+
+/*
+    // materialize date picker
+    if (this.format === 'date' && this.jsoneditor.options.theme === 'materialize' && !$isCordova()) {
+      $(this.input).pickadate({format: 'dd/mm/yyyy'});
+      this.input = $(this.control).find('input').get(0);
+      $(this.input).change(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        self.refreshValue();
+        self.onChange(true);
+      });
+    }
+*/
 
     // Any special formatting that needs to happen after the input is added to the dom
     window.requestAnimationFrame(function() {
@@ -5543,14 +5559,16 @@ JSONEditor.defaults.editors.enum = JSONEditor.AbstractEditor.extend({
     
     if(this.options.hide_display) this.display_area.style.display = "none";
 
-    this.switcher.addEventListener('change',function() {
+    this.theme.attachHandlers(this.switcher, function() {
       self.selected = self.select_options.indexOf(this.value);
       self.value = self.enum[self.selected];
       self.refreshValue();
       self.onChange(true);
     });
+
     this.value = this.enum[0];
     this.refreshValue();
+    this.theme.afterRefresh(this.switcher);
 
     if(this.enum.length === 1) this.switcher.style.display = 'none';
   },
@@ -5794,6 +5812,7 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
     if (this.select2)
       this.select2.select2('val', this.input.value);
     this.value = sanitized;
+    this.theme.setSelectValue(this.input);
     this.onChange();
   },
   register: function () {
@@ -5957,14 +5976,15 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
     multipleSelect = (this.schema.multiple) || false;
     this.input.multiple = multipleSelect;
 
-    this.input.addEventListener('change', function (e) {
+    this.control = this.theme.getFormControl(this.label, this.input, this.description, this.schema.info);
+
+    this.container.appendChild(this.control);
+
+    this.theme.attachHandlers(this.input, function(e) {
       e.preventDefault();
       e.stopPropagation();
       self.onInputChange();
     });
-
-    this.control = this.theme.getFormControl(this.label, this.input, this.description, this.schema.info);
-    this.container.appendChild(this.control);
 
     this.value = this.enum_values[0];
   },
@@ -6999,6 +7019,10 @@ var getImageURIWithoutBlankMargins = function (sigpad) {
 
 
 JSONEditor.AbstractTheme = Class.extend({
+  // TODO: make all editors use this
+  attachHandlers: function(input, handler) {
+    input.addEventListener('change', handler);
+  },
   getContainer: function() {
     return document.createElement('div');
   },
@@ -7165,6 +7189,9 @@ JSONEditor.AbstractTheme = Class.extend({
       option.textContent = titles[i] || options[i];
       select.appendChild(option);
     }
+  },
+  setSelectValue: function(input) {
+
   },
   getTextareaInput: function() {
     var el = document.createElement('textarea');
@@ -8256,6 +8283,281 @@ JSONEditor.defaults.themes.jqueryui = JSONEditor.AbstractTheme.extend({
   },
   markTabInactive: function(tab) {
     tab.className = tab.className.replace(/\s*ui-state-active/g,'')+' ui-widget-header';
+  }
+});
+
+JSONEditor.defaults.themes.materialize = JSONEditor.AbstractTheme.extend({
+  attachHandlers: function(input, handler) {
+    // materialize datepicker
+    if (input.tagName === 'INPUT' && input.getAttribute('type') === 'date') {
+      if (!$isCordova()) { // don't use on mobile
+        $(input).pickadate({format: 'dd/mm/yyyy'});
+        input = $(input.parentNode).find('input').get(0);
+      }
+      $(input).change(handler); // only triggers through jquery
+    }
+    // materialize selects
+    else if (input.tagName === 'SELECT') {
+      if (!$isCordova()) { // don't use on mobile
+        $(input).material_select();
+        input = $(input.parentNode).find('select').get(0);
+      }
+      $(input).change(handler); // only triggers through jquery
+    }
+    else this._super(input, handler);
+  },
+  setGridColumnSize: function(el,size) {
+    el.className += ' col m'+size;
+  },
+  afterInputReady: function(input) {
+    if(input.controlgroup) return;
+    input.controlgroup = this.closest(input, '.input-container');
+  },
+  setSelectValue: function(input) {
+    $(input).material_select(); // re-initialise when the value is programmatically changed
+  },
+  setSelectOptions: function(select, options, titles) {
+    titles = titles || [];
+    if ($isCordova()) select.className += ' browser-default'; // browser default on mobile
+    select.innerHTML = '';
+    var defaultOp = document.createElement('option');
+    defaultOp.textContent = "Choose Option";
+    defaultOp.disabled = true;
+    defaultOp.selected = true;
+    select.appendChild(defaultOp);
+    for(var i=0; i<options.length; i++) {
+      var option = document.createElement('option');
+      option.setAttribute('value',options[i]);
+      option.textContent = titles[i] || options[i];
+      select.appendChild(option);
+    }
+  },
+  getTextareaInput: function() {
+    var el = document.createElement('textarea');
+    el.className = 'materialize-textarea';
+    return el;
+  },
+  getFormInputField: function(type) {
+    var el = this._super(type);
+    return el;
+  },
+  getFormControl: function(label, input, description, info) {
+    var group = document.createElement('div');
+    var infoSpan = document.createElement("i");
+
+    group.className += ' input-container';
+
+    var nestedInput = input.querySelector('input');
+    if(nestedInput !== null && nestedInput.getAttribute('type') === 'radio') {
+      if (info) {
+        infoSpan.setAttribute("class", "fa fa-info prefix jutoInfoLabel");
+        infoSpan.info = info;
+        group.appendChild(infoSpan);
+        group.appendChild(document.createTextNode("\x20")); // space
+      }
+      group.appendChild(label);
+      group.appendChild(input);
+    }
+    else if(label && input.getAttribute('type') === 'checkbox') {
+      input.className += ' filled-in';
+      var id= $uuid();
+      input.id = id;
+      label.setAttribute("for", id);
+      group.appendChild(input);
+      group.appendChild(label);
+      if (description) group.appendChild(document.createElement('br'));
+    }
+    else {
+      group.className += ' input-field';
+      if (nestedInput !== null && nestedInput.getAttribute('type') === 'file')
+        group.className = group.className.replace(/\s?input-field/g,'');
+
+      if (info) {
+        infoSpan.setAttribute("class", "fa fa-info prefix jutoInfoLabel");
+        infoSpan.info = info;
+        infoSpan.style.textAlign = "center";
+        group.appendChild(infoSpan);
+      }
+      if (input.getAttribute('type') === 'range') {
+        group.className = group.className.replace(/\s?input-field/g,'range-field');
+        if (label) group.appendChild(label);
+        group.appendChild(input);
+      }
+      else if (input.getAttribute('type') === 'color') {
+        group.className = group.className.replace(/\s?input-field/g,'');
+        if (label) {
+          group.appendChild(label);
+          group.appendChild(document.createElement('br'));
+        }
+        group.appendChild(input);
+        if (description) group.appendChild(document.createElement('br'));
+      }
+      else {
+        group.appendChild(input);
+        if (label) group.appendChild(label);
+      }
+    }
+
+    if(description) {
+      description.style.fontSize = '0.8em';
+      group.appendChild(description);
+    }
+
+    return group;
+  },
+  getRadioLabel: function(text, isChecked) {
+    var el = this.getFormInputLabel(text);
+    el.setAttribute("class","radioLabel");
+    return el;
+  },
+  getHeader: function(text) {
+    var el = document.createElement('h4');
+    if(typeof text === "string") {
+      el.textContent = text;
+    }
+    else {
+      el.appendChild(text);
+    }
+
+    return el;
+  },
+  getRadioInput: function(name, value, checked) {
+    var radio = this.getFormInputField('radio');
+    radio.setAttribute("name",name);
+    radio.setAttribute("value",value);
+    if (checked) {
+     radio.setAttribute("checked",true);
+    }
+    radio.setAttribute("class","radio");
+    return radio;
+  },
+//getRadioGroupFormControl(this.path, self.enum_values, self.enum_display, this.schema.default)
+  getRadioGroupFormControl: function(name, options, titles, defaultVal) {
+    var holder = document.createElement("div");
+    holder.setAttribute("class","radio-holder");
+    for(var i=0; i<options.length; i++) {
+      var isChecked = (options[i] === defaultVal);
+      var radio = this.getRadioInput(name, options[i], isChecked);
+      var radioLabel = this.getRadioLabel(titles[i] || options[i], isChecked);
+      var uuid = $uuid();
+      radio.setAttribute("id",uuid);
+      radioLabel.setAttribute("for",uuid);
+      var p = document.createElement("p");
+      p.appendChild(radio);
+      p.appendChild(radioLabel);
+      holder.appendChild(p);
+    }
+    return holder;
+  },  
+  getIndentedPanel: function() {
+    var el = document.createElement('div');
+    el.className = 'card-panel';
+    return el;
+  },
+  getFormInputDescription: function(text) {
+    var el = document.createElement('span');
+    el.textContent = text;
+    return el;
+  },
+  getHeaderButtonHolder: function() {
+    var el = this.getButtonHolder();
+    el.style.marginLeft = '10px';
+    return el;
+  },
+  getButtonHolder: function() {
+    var el = document.createElement('span');
+    el.style.fontSize = '12px';
+    el.style.verticalAlign = 'middle';
+    return el;
+  },
+  getButton: function(text, icon, title) {
+    var el = this._super(text, icon, title);
+    el.className += 'waves-effect waves-light btn';
+    return el;
+  },
+  getTable: function() {
+    var el = document.createElement('table');
+    el.className = 'table table-bordered';
+    el.style.width = 'auto';
+    el.style.maxWidth = 'none';
+    return el;
+  },
+
+  addInputError: function(input,text) {
+    if(!input.controlgroup) return;
+    var label = input.controlgroup.querySelector('label');
+    if (label) label.className += ' red-text text-lighten-1';
+    if(!input.errmsg) {
+      input.errmsg = document.createElement('span');
+      input.errmsg.className = 'red-text';
+      input.errmsg.style.fontSize = '0.8em';
+      input.controlgroup.appendChild(input.errmsg);
+    }
+    else {
+      input.errmsg.style.display = '';
+    }
+
+    input.errmsg.textContent = text;
+  },
+  removeInputError: function(input) {
+    if(!input.errmsg) return;
+    input.errmsg.style.display = 'none';
+    var label = input.controlgroup.querySelector('label');
+    if (label) label.className = label.className.replace(/\s?red-text\stext-lighten-1/g, '');
+  },
+  getTabHolder: function() {
+    var el = document.createElement('div');
+    el.innerHTML = "<div class='collection col m2'></div><div class='col m10'></div>";
+    el.className = 'row';
+    return el;
+  },
+  getTab: function(text) {
+    var el = document.createElement('a');
+    el.className = 'collection-item';
+    el.setAttribute('href','#');
+    el.appendChild(text);
+    return el;
+  },
+  markTabActive: function(tab) {
+    tab.className += ' active';
+  },
+  markTabInactive: function(tab) {
+    tab.className = tab.className.replace(/\s?active/g,'');
+  },
+  getProgressBar: function() {
+    var min = 0, max = 100, start = 0;
+
+    var container = document.createElement('div');
+    container.className = 'progress';
+
+    var bar = document.createElement('div');
+    bar.className = 'determinate';
+    bar.setAttribute('role', 'progressbar');
+    bar.setAttribute('aria-valuenow', start);
+    bar.setAttribute('aria-valuemin', min);
+    bar.setAttribute('aria-valuenax', max);
+    bar.innerHTML = start + "%";
+    container.appendChild(bar);
+
+    return container;
+  },
+  updateProgressBar: function(progressBar, progress) {
+    if (!progressBar) return;
+
+    var bar = progressBar.firstChild;
+    var percentage = progress + "%";
+    bar.setAttribute('aria-valuenow', progress);
+    bar.style.width = percentage;
+    bar.innerHTML = percentage;
+  },
+  updateProgressBarUnknown: function(progressBar) {
+    if (!progressBar) return;
+
+    var bar = progressBar.firstChild;
+    progressBar.className = 'progress';
+    bar.className = 'indeterminate';
+    bar.removeAttribute('aria-valuenow');
+    bar.innerHTML = '';
   }
 });
 
