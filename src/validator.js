@@ -496,8 +496,8 @@ JSONEditor.Validator = Class.extend({
        * Type Specific Validation
        */
 
-      // Number Specific Validation
-      if (typeof value === "number" || schema.format === "number") {
+      // Number-Range Specific Validation
+      if (typeof value === "number" || schema.format === "number" || schema.format === "range") {
         var valueToTest = value;
         // the format is a number but the type isn't...
         if (schema.format === "number" && typeof valueToTest !== "number") {
@@ -522,7 +522,7 @@ JSONEditor.Validator = Class.extend({
         }
 
         // `maximum`
-        if (schema.hasOwnProperty('maximum')) {
+        if (schema.hasOwnProperty('maximum') && !schema.overrideMaximum) {
           if (schema.exclusiveMaximum && valueToTest >= schema.maximum) {
             errors.push({
               path: path,

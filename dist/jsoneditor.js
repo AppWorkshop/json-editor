@@ -1275,8 +1275,8 @@ JSONEditor.Validator = Class.extend({
        * Type Specific Validation
        */
 
-      // Number Specific Validation
-      if (typeof value === "number" || schema.format === "number") {
+      // Number-Range Specific Validation
+      if (typeof value === "number" || schema.format === "number" || schema.format === "range") {
         var valueToTest = value;
         // the format is a number but the type isn't...
         if (schema.format === "number" && typeof valueToTest !== "number") {
@@ -1301,7 +1301,7 @@ JSONEditor.Validator = Class.extend({
         }
 
         // `maximum`
-        if (schema.hasOwnProperty('maximum')) {
+        if (schema.hasOwnProperty('maximum') && !schema.overrideMaximum) {
           if (schema.exclusiveMaximum && valueToTest >= schema.maximum) {
             errors.push({
               path: path,
@@ -2319,7 +2319,7 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
       }
       // Range Input
       else if(this.format === 'range') {
-        this.input_type = 'range';
+        this.input_type = this.format;
         var min = this.schema.minimum || 0;
         var max = this.schema.maximum || Math.max(100,min+1);
         var step = 1;
@@ -2330,6 +2330,21 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
         }
 
         this.input = this.theme.getRangeInput(min,max,step);
+
+        // Allow an input alongside a range slider
+        if (this.schema.overrideMaximum) {
+          var rangeInput = this.input;
+          this.input = this.theme.getFormInputField('number');
+          this.secondaryControl = this.theme.getFormControl(null, rangeInput);
+
+          this.input.addEventListener('change', function(e) {
+            rangeInput.value = e.target.value;
+          });
+          rangeInput.addEventListener('change', function(e) {
+            self.setValue(e.target.value);
+          });
+          rangeInput.value = this.schema.default;
+        }
       }
       // Source Code
       else if([
@@ -2433,6 +2448,7 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
         }
       }
     }
+
     this.theme.attachHandlers(this.input, function(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -2473,6 +2489,9 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     this.control = this.theme.getFormControl(this.label, this.input, this.description, this.schema.info);
 
     this.container.appendChild(this.control);
+
+    if (this.secondaryControl) this.container.appendChild(this.secondaryControl);
+
 
 /*
     // materialize date picker
