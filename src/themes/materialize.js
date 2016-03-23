@@ -91,7 +91,7 @@ JSONEditor.defaults.themes.materialize = JSONEditor.AbstractTheme.extend({
         group.appendChild(infoSpan);
       }
       if (input.getAttribute('type') === 'range') {
-        group.className = group.className.replace(/\s?input-field/g,'range-field');
+        group.className = group.className.replace(/\s?input-field/g,' range-field');
         if (label) group.appendChild(label);
         group.appendChild(input);
       }
