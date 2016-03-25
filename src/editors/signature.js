@@ -80,6 +80,92 @@ JSONEditor.defaults.editors.signature = JSONEditor.AbstractEditor.extend({
       resize(parent.width(), (parent.height() - parent.children('.btn-group').height()));
     }
     function resize(w, h){
+
+// add a "getImageDataWithoutBlankMargins" function to the signature.
+// from https://github.com/szimek/signature_pad/issues/49#issue-29108215
+
+      var getImageURIWithoutBlankMargins = function (sigpad) {
+        var ctx = sigpad._ctx,
+          canvas = sigpad._ctx.canvas;
+        var imgWidth = canvas.width;
+        var imgHeight = canvas.height;
+        if (imgWidth > 0 && imgHeight > 0) {
+          var imageData = ctx.getImageData(0, 0, imgWidth, imgHeight),
+            data = imageData.data,
+            getAlpha = function(x, y) {
+              return data[(imgWidth*y + x) * 4 + 3];
+            },
+            scanY = function (fromTop) {
+              var offset = fromTop ? 1 : -1;
+
+              // loop through each row
+              for(var y = fromTop ? 0 : imgHeight - 1; fromTop ? (y < imgHeight) : (y > -1); y += offset) {
+
+                // loop through each column
+                for(var x = 0; x < imgWidth; x++) {
+                  if (getAlpha(x, y)) {
+                    return y;
+                  }
+                }
+              }
+              return null; // all image is white
+            },
+            scanX = function (fromLeft) {
+              var offset = fromLeft? 1 : -1;
+
+              // loop through each column
+              for(var x = fromLeft ? 0 : imgWidth - 1; fromLeft ? (x < imgWidth) : (x > -1); x += offset) {
+
+                // loop through each row
+                for(var y = 0; y < imgHeight; y++) {
+                  if (getAlpha(x, y)) {
+                    return x;
+                  }
+                }
+              }
+              return null; // all image is white
+            };
+
+          var cropTop = scanY(true),
+            cropBottom = scanY(false),
+            cropLeft = scanX(true),
+            cropRight = scanX(false);
+
+          // figure out which dimension is larger
+          var referenceDim,
+            heightDifference,
+            heightDifferencePC,
+            widthDifference,
+            widthDifferencePC,
+            newHeight,
+            newWidth;
+
+          // how much smaller is the (desired) new canvas?
+          widthDifference = canvas.width - (cropRight-cropLeft) - 2 ; // could be negative if it's been reduced in size.
+          heightDifference = canvas.height - (cropBottom-cropTop) - 2; // ditto
+
+          widthDifferencePC = (widthDifference / canvas.width); // e.g. 10% smaller would give us 0.1
+          heightDifferencePC = (heightDifference / canvas.height);
+
+          // calculate how our image needs to scale, keeping aspect ratio of its data
+          referenceDim = Math.min(widthDifferencePC, heightDifferencePC);
+          newHeight = canvas.height - (referenceDim * canvas.height);
+          newWidth = canvas.width - (referenceDim * canvas.width);
+
+
+          var relevantData = sigpad._ctx.getImageData(cropLeft, cropTop, (cropRight-cropLeft+2), (cropBottom-cropTop+2));
+          // create an off-screen canvas of the requisite size, to get imagedata as a data uri
+          var tempCanvas = document.createElement('canvas');
+          tempCanvas.width = newWidth;
+          tempCanvas.height = newHeight;
+          var tempctx = tempCanvas.getContext('2d');
+          tempctx.putImageData(relevantData, 0, 0);
+          return tempCanvas.toDataURL("image/png");
+        }
+        return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>'; // empty SVG data uri
+
+      };
+
       // which one's been reduced by more: height, or width?
       var referenceDim,
         heightDifference,
@@ -107,7 +193,7 @@ JSONEditor.defaults.editors.signature = JSONEditor.AbstractEditor.extend({
         canvas.height = h;
 
         var ctx = canvas.getContext('2d');
-        var img = new Image;
+        var img = new Image();
         img.onload = function () {
           // scale the image.
           ctx.drawImage(img, 0, 0, newWidth, newHeight); // Or at whatever offset you like
@@ -165,88 +251,4 @@ JSONEditor.defaults.editors.signature = JSONEditor.AbstractEditor.extend({
   }
 });
 
-// add a "getImageDataWithoutBlankMargins" function to the signature.
-// from https://github.com/szimek/signature_pad/issues/49#issue-29108215
-
-var getImageURIWithoutBlankMargins = function (sigpad) {
-  var ctx = sigpad._ctx,
-    canvas = sigpad._ctx.canvas;
-  var imgWidth = canvas.width;
-  var imgHeight = canvas.height;
-  if (imgWidth > 0 && imgHeight > 0) {
-    var imageData = ctx.getImageData(0, 0, imgWidth, imgHeight),
-      data = imageData.data,
-      getAlpha = function(x, y) {
-        return data[(imgWidth*y + x) * 4 + 3]
-      },
-      scanY = function (fromTop) {
-        var offset = fromTop ? 1 : -1;
-
-        // loop through each row
-        for(var y = fromTop ? 0 : imgHeight - 1; fromTop ? (y < imgHeight) : (y > -1); y += offset) {
-
-          // loop through each column
-          for(var x = 0; x < imgWidth; x++) {
-            if (getAlpha(x, y)) {
-              return y;
-            }
-          }
-        }
-        return null; // all image is white
-      },
-      scanX = function (fromLeft) {
-        var offset = fromLeft? 1 : -1;
-
-        // loop through each column
-        for(var x = fromLeft ? 0 : imgWidth - 1; fromLeft ? (x < imgWidth) : (x > -1); x += offset) {
-
-          // loop through each row
-          for(var y = 0; y < imgHeight; y++) {
-            if (getAlpha(x, y)) {
-              return x;
-            }
-          }
-        }
-        return null; // all image is white
-      };
-
-    var cropTop = scanY(true),
-      cropBottom = scanY(false),
-      cropLeft = scanX(true),
-      cropRight = scanX(false);
-
-    // figure out which dimension is larger
-    var referenceDim,
-      heightDifference,
-      heightDifferencePC,
-      widthDifference,
-      widthDifferencePC,
-      newHeight,
-      newWidth;
-
-    // how much smaller is the (desired) new canvas?
-    widthDifference = canvas.width - (cropRight-cropLeft) - 2 ; // could be negative if it's been reduced in size.
-    heightDifference = canvas.height - (cropBottom-cropTop) - 2; // ditto
-
-    widthDifferencePC = (widthDifference / canvas.width); // e.g. 10% smaller would give us 0.1
-    heightDifferencePC = (heightDifference / canvas.height);
-
-    // calculate how our image needs to scale, keeping aspect ratio of its data
-    referenceDim = Math.min(widthDifferencePC, heightDifferencePC);
-    newHeight = canvas.height - (referenceDim * canvas.height);
-    newWidth = canvas.width - (referenceDim * canvas.width);
-
-
-    var relevantData = sigpad._ctx.getImageData(cropLeft, cropTop, (cropRight-cropLeft+2), (cropBottom-cropTop+2));
-    // create an off-screen canvas of the requisite size, to get imagedata as a data uri
-    var tempCanvas = document.createElement('canvas');
-    tempCanvas.width = newWidth;
-    tempCanvas.height = newHeight;
-    var tempctx = tempCanvas.getContext('2d');
-    tempctx.putImageData(relevantData, 0, 0);
-    return tempCanvas.toDataURL("image/png");
-  }
-  return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>'; // empty SVG data uri
-
-};
 

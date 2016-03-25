@@ -59,6 +59,13 @@ JSONEditor.defaults.themes.materialize = JSONEditor.AbstractTheme.extend({
 
     group.className += ' input-container';
 
+    if (label) {
+      var id = $uuid();
+      input.id = id;
+      label.setAttribute("for", id);
+    }
+
+
     var nestedInput = input.querySelector('input');
     if(nestedInput !== null && nestedInput.getAttribute('type') === 'radio') {
       if (info) {
@@ -72,9 +79,6 @@ JSONEditor.defaults.themes.materialize = JSONEditor.AbstractTheme.extend({
     }
     else if(label && input.getAttribute('type') === 'checkbox') {
       input.className += ' filled-in';
-      var id= $uuid();
-      input.id = id;
-      label.setAttribute("for", id);
       group.appendChild(input);
       group.appendChild(label);
       if (description) group.appendChild(document.createElement('br'));
