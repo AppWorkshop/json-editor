@@ -112,7 +112,7 @@ JSONEditor.defaults.themes.materialize = JSONEditor.AbstractTheme.extend({
     else this._super(input, handler);
   },
   setGridColumnSize: function(el,size) {
-    el.className += ' col m'+size;
+    el.className += ' col s'+size;
   },
   afterInputReady: function(input) {
     if(input.controlgroup) return;
