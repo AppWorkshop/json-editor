@@ -1,4 +1,7 @@
 JSONEditor.AbstractTheme = Class.extend({
+  onReady: function() {
+    // Called when the json-editor instance is ready.
+  },
   // TODO: make all editors use this
   attachHandlers: function(input, handler) {
     input.addEventListener('change', handler);

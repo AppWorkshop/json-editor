@@ -56,6 +56,8 @@ JSONEditor.prototype = {
       // Fire ready event asynchronously
       window.requestAnimationFrame(function() {
         if(!self.ready) return;
+
+        self.theme.onReady();
         self.validation_results = self.validator.validate(self.root.getValue());
         self.root.showValidationErrors(self.validation_results);
         self.trigger('ready');
