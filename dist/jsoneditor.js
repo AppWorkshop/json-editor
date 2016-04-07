@@ -8571,7 +8571,7 @@ JSONEditor.defaults.themes.materialize = JSONEditor.AbstractTheme.extend({
     if (label) label.className += ' red-text text-lighten-1';
     if(!input.errmsg) {
       input.errmsg = document.createElement('span');
-      input.errmsg.className = 'red-text';
+      input.errmsg.className = 'red-text col s12 align-right';
       input.errmsg.style.fontSize = '0.8em';
       input.controlgroup.appendChild(input.errmsg);
     }
