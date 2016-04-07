@@ -2333,18 +2333,53 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
 
         this.input = this.theme.getRangeInput(min,max,step);
 
-        // Allow an input alongside a range slider
+        // Do we have mobile range slider defined? If so use it. (https://github.com/ubilabs/mobile-range-slider)
+        if (MobileRangeSlider !== 'undefined') {
+          // set up the nessiscariry markup
+          var rangeDiv = document.createElement('div');
+          rangeDiv.className = 'slider';
+          rangeDiv.innerHTML = '<div class="track"></div><div class="knob"></div>';
+
+          // create the mobile slider
+          this.mobileRangeSlider = new MobileRangeSlider(rangeDiv, {
+            min: min,
+            max: max,
+            change: function(value) {
+             self.setValue(String(value));
+            }
+          });
+
+          this.input = rangeDiv; // set the input to the new mobile slider
+        }
+
+        // Allow an input alongside a range slider to override the maximum property
         if (this.schema.overrideMaximum) {
-          var rangeInput = this.input;
-          this.input = this.theme.getFormInputField('number');
+          var rangeInput = this.input; // store the range input
+          this.input = this.theme.getFormInputField('number'); // make a number input the primary input
+          // create the control for the range slider
           this.secondaryControl = this.theme.getFormControl(null, rangeInput);
 
+          // update the range slider when we change the primary input
           this.input.addEventListener('change', function(e) {
-            rangeInput.value = e.target.value;
+            if (self.mobileRangeSlider) {
+              // modified from the mobile slider source
+              // sets the knob position instead of setValue which calls the change callback (we don't want that)
+              var
+                knobWidth = rangeInput.getElementsByClassName('knob')[0].offsetWidth,
+                trackWidth = rangeInput.getElementsByClassName('track')[0].offsetWidth,
+                range = max - min,
+                width = trackWidth - knobWidth,
+                position = Math.round((Math.min(e.target.value, max) - min) * width / range);
+
+              self.mobileRangeSlider.setKnobPosition(position);
+            }
+            else rangeInput.value = e.target.value;
           });
+          // update the primary input when we change the range slider
           rangeInput.addEventListener('change', function(e) {
             self.setValue(e.target.value);
           });
+          // set the range slider to the default value
           rangeInput.value = this.schema.default;
         }
       }
@@ -2540,6 +2575,9 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
   },
   afterInputReady: function() {
     var self = this, options;
+
+    // Set the mobile range slider to the default value
+    if (this.mobileRangeSlider) this.mobileRangeSlider.setValue(this.schema.default);
     
     // Code editor
     if(this.source_code) {      
