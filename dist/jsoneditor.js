@@ -2334,7 +2334,7 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
         this.input = this.theme.getRangeInput(min,max,step);
 
         // Do we have mobile range slider defined? If so use it. (https://github.com/ubilabs/mobile-range-slider)
-        if (MobileRangeSlider !== 'undefined') {
+        if (typeof MobileRangeSlider !== 'undefined') {
           // set up the nessiscariry markup
           var rangeDiv = document.createElement('div');
           rangeDiv.className = 'slider';
