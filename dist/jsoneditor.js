@@ -2333,18 +2333,53 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
 
         this.input = this.theme.getRangeInput(min,max,step);
 
-        // Allow an input alongside a range slider
+        // Do we have mobile range slider defined? If so use it. (https://github.com/ubilabs/mobile-range-slider)
+        if (MobileRangeSlider !== 'undefined') {
+          // set up the nessiscariry markup
+          var rangeDiv = document.createElement('div');
+          rangeDiv.className = 'slider';
+          rangeDiv.innerHTML = '<div class="track"></div><div class="knob"></div>';
+
+          // create the mobile slider
+          this.mobileRangeSlider = new MobileRangeSlider(rangeDiv, {
+            min: min,
+            max: max,
+            change: function(value) {
+             self.setValue(String(value));
+            }
+          });
+
+          this.input = rangeDiv; // set the input to the new mobile slider
+        }
+
+        // Allow an input alongside a range slider to override the maximum property
         if (this.schema.overrideMaximum) {
-          var rangeInput = this.input;
-          this.input = this.theme.getFormInputField('number');
+          var rangeInput = this.input; // store the range input
+          this.input = this.theme.getFormInputField('number'); // make a number input the primary input
+          // create the control for the range slider
           this.secondaryControl = this.theme.getFormControl(null, rangeInput);
 
+          // update the range slider when we change the primary input
           this.input.addEventListener('change', function(e) {
-            rangeInput.value = e.target.value;
+            if (self.mobileRangeSlider) {
+              // modified from the mobile slider source
+              // sets the knob position instead of setValue which calls the change callback (we don't want that)
+              var
+                knobWidth = rangeInput.getElementsByClassName('knob')[0].offsetWidth,
+                trackWidth = rangeInput.getElementsByClassName('track')[0].offsetWidth,
+                range = max - min,
+                width = trackWidth - knobWidth,
+                position = Math.round((Math.min(e.target.value, max) - min) * width / range);
+
+              self.mobileRangeSlider.setKnobPosition(position);
+            }
+            else rangeInput.value = e.target.value;
           });
+          // update the primary input when we change the range slider
           rangeInput.addEventListener('change', function(e) {
             self.setValue(e.target.value);
           });
+          // set the range slider to the default value
           rangeInput.value = this.schema.default;
         }
       }
@@ -2540,6 +2575,9 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
   },
   afterInputReady: function() {
     var self = this, options;
+
+    // Set the mobile range slider to the default value
+    if (this.mobileRangeSlider) this.mobileRangeSlider.setValue(this.schema.default);
     
     // Code editor
     if(this.source_code) {      
@@ -7050,7 +7088,21 @@ JSONEditor.AbstractTheme = Class.extend({
     input.addEventListener('change', handler);
   },
   getContainer: function() {
-    return document.createElement('div');
+    // attach stylesheet for mobile range slider
+    var style = document.createElement('style');
+    var rangeCSS =
+            "/* Mobile Range Slider */\n"
+          + ".slider {position: relative; margin: 10px 0; width: 100%; height: 40px;}"
+          + ".track {position: absolute; top: 19px; left: 0; right: 0; height: 3px; background-color: #AAA;}"
+          + ".knob {position: absolute; margin: 0; padding: 0; height: 40px; width: 25px; border-radius: 10px;"
+          + "background: rgb(253,253,253); border: 1px solid rgb(160,160,160); cursor: pointer;}";
+
+    style.textContent = rangeCSS;
+
+    var container = document.createElement('div');
+    container.appendChild(style);
+
+    return container;
   },
   getCanvas: function() {
     return document.createElement('canvas');
@@ -8313,99 +8365,6 @@ JSONEditor.defaults.themes.jqueryui = JSONEditor.AbstractTheme.extend({
 });
 
 JSONEditor.defaults.themes.materialize = JSONEditor.AbstractTheme.extend({
-  rangeSliderReinit: function() {
-    /**
-     * Taken from materialize.js
-     * The range slider may not initialise properly when it's injected dynamically
-     * This is used to reinitialize the range slider after it has been inserted
-     * TODO: detect if range slider has already been initialised
-     */
-
-    var range_type = 'input[type=range]';
-    var range_mousedown = false;
-    var left;
-    $(range_type).each(function () {
-      var thumb = $('<span class="thumb"><span class="value"></span></span>');
-      $(this).after(thumb);
-    });
-    var range_wrapper = '.range-field';
-    $(document).on('change', range_type, function(e) {
-      var thumb = $(this).siblings('.thumb');
-      thumb.find('.value').html($(this).val());
-    });
-    $(document).on('input mousedown touchstart', range_type, function(e) {
-      var thumb = $(this).siblings('.thumb');
-      var width = $(this).outerWidth();
-      // If thumb indicator does not exist yet, create it
-      if (thumb.length <= 0) {
-        thumb = $('<span class="thumb"><span class="value"></span></span>');
-        $(this).after(thumb);
-      }
-      // Set indicator value
-      thumb.find('.value').html($(this).val());
-      range_mousedown = true;
-      $(this).addClass('active');
-      if (!thumb.hasClass('active')) {
-        thumb.velocity({ height: "30px", width: "30px", top: "-20px", marginLeft: "-15px"}, { duration: 300, easing: 'easeOutExpo' });
-      }
-      if (e.type !== 'input') {
-        if(e.pageX === undefined || e.pageX === null){//mobile
-          left = e.originalEvent.touches[0].pageX - $(this).offset().left;
-        }
-        else{ // desktop
-          left = e.pageX - $(this).offset().left;
-        }
-        if (left < 0) {
-          left = 0;
-        }
-        else if (left > width) {
-          left = width;
-        }
-        thumb.addClass('active').css('left', left);
-      }
-      thumb.find('.value').html($(this).val());
-    });
-    $(document).on('mouseup touchend', range_wrapper, function() {
-      range_mousedown = false;
-      $(this).removeClass('active');
-    });
-    $(document).on('mousemove touchmove', range_wrapper, function(e) {
-      var thumb = $(this).children('.thumb');
-      var left;
-      if (range_mousedown) {
-        if (!thumb.hasClass('active')) {
-          thumb.velocity({ height: '30px', width: '30px', top: '-20px', marginLeft: '-15px'}, { duration: 300, easing: 'easeOutExpo' });
-        }
-        if (e.pageX === undefined || e.pageX === null) { //mobile
-          left = e.originalEvent.touches[0].pageX - $(this).offset().left;
-        }
-        else{ // desktop
-          left = e.pageX - $(this).offset().left;
-        }
-        var width = $(this).outerWidth();
-        if (left < 0) {
-          left = 0;
-        }
-        else if (left > width) {
-          left = width;
-        }
-        thumb.addClass('active').css('left', left);
-        thumb.find('.value').html(thumb.siblings(range_type).val());
-      }
-    });
-    $(document).on('mouseout touchleave', range_wrapper, function() {
-      if (!range_mousedown) {
-        var thumb = $(this).children('.thumb');
-        if (thumb.hasClass('active')) {
-          thumb.velocity({ height: '0', width: '0', top: '10px', marginLeft: '-6px'}, { duration: 100 });
-        }
-        thumb.removeClass('active');
-      }
-    });
-  },
-  onReady: function() {
-    this.rangeSliderReinit();
-  },
   attachHandlers: function(input, handler) {
     // materialize datepicker
     if (input.tagName === 'INPUT' && input.getAttribute('type') === 'date') {
