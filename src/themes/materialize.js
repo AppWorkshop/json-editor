@@ -114,10 +114,7 @@ JSONEditor.defaults.themes.materialize = JSONEditor.AbstractTheme.extend({
       }
     }
 
-    if(description) {
-      description.style.fontSize = '0.8em';
-      group.appendChild(description);
-    }
+    if(description) group.appendChild(description);
 
     return group;
   },
@@ -206,7 +203,6 @@ JSONEditor.defaults.themes.materialize = JSONEditor.AbstractTheme.extend({
     if(!input.errmsg) {
       input.errmsg = document.createElement('span');
       input.errmsg.className = 'red-text col s12 align-right';
-      input.errmsg.style.fontSize = '0.8em';
       input.controlgroup.appendChild(input.errmsg);
     }
     else {
