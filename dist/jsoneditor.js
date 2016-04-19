@@ -8564,18 +8564,21 @@ JSONEditor.defaults.themes.materialize = JSONEditor.AbstractTheme.extend({
 
   addInputError: function(input,text) {
     if(!input.controlgroup) return;
-    var label = input.controlgroup.querySelector('label');
-    if (label) label.className += ' red-text text-lighten-1';
     if(!input.errmsg) {
-      input.errmsg = document.createElement('span');
-      input.errmsg.className = 'red-text col s12 align-right';
+      input.errmsg = document.createElement('div');
+      input.errmsg.className = 'red-text right-align';
+
+      var errIcon = document.createElement('i');
+      errIcon.className = 'mdi-alert-warning';
+      input.errmsg.appendChild(errIcon);
+
       input.controlgroup.appendChild(input.errmsg);
     }
     else {
       input.errmsg.style.display = '';
     }
 
-    input.errmsg.textContent = text;
+    input.errmsg.innerHTML += (' ' + text);
   },
   removeInputError: function(input) {
     if(!input.errmsg) return;
