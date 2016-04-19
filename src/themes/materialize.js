@@ -202,17 +202,13 @@ JSONEditor.defaults.themes.materialize = JSONEditor.AbstractTheme.extend({
       input.errmsg = document.createElement('div');
       input.errmsg.className = 'red-text right-align';
 
-      var errIcon = document.createElement('i');
-      errIcon.className = 'mdi-alert-warning';
-      input.errmsg.appendChild(errIcon);
-
       input.controlgroup.appendChild(input.errmsg);
     }
     else {
       input.errmsg.style.display = '';
     }
 
-    input.errmsg.innerHTML += (' ' + text);
+    input.errmsg.innerHTML = '<i class="mdi-alert-warning"></i> ' + text;
   },
   removeInputError: function(input) {
     if(!input.errmsg) return;
