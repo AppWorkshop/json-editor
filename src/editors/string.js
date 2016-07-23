@@ -84,7 +84,7 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
   build: function() {
     var self = this, i;
     if(!this.options.compact) this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
-    if(this.schema.description) this.description = this.theme.getFormInputDescription(this.schema.description);
+    if(this.schema.description) this.description = this.theme.getFormInputDescription(this.schema.description, this.schema.showHTML);
 
     this.format = this.schema.format;
     if(!this.format && this.schema.media && this.schema.media.type) {

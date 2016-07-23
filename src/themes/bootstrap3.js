@@ -133,7 +133,12 @@ JSONEditor.defaults.themes.bootstrap3 = JSONEditor.AbstractTheme.extend({
     el.className = 'well well-sm';
     return el;
   },
-  getFormInputDescription: function(text) {
+  getFormInputDescription: function(text, html) {
+    if (html) {
+      var div = document.createElement('div');
+      div.innerHTML = text;
+      return div;
+    }
     var el = document.createElement('p');
     el.className = 'help-block';
     el.textContent = text;
