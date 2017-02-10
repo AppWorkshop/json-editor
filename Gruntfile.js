@@ -6,59 +6,59 @@ module.exports = function(grunt) {
       dist: {
         src: [
           // License & version info, start the containing closure
-          'src/intro.js',
+          'imports/src/intro.js',
           
           // Simple inheritance
-          'src/class.js',
+          'imports/src/class.js',
           // IE9 polyfills
-          'src/ie9.js',
+          'imports/src/ie9.js',
           // Utils like extend, each, and trigger
-          'src/utilities.js',
+          'imports/src/utilities.js',
           
           // The main JSONEditor class
-          'src/core.js',
+          'imports/src/core.js',
 
           // JSON Schema validator
-          'src/validator.js',
+          'imports/src/validator.js',
           
           // All the editors
-          'src/editor.js',
-          'src/editors/null.js',
-          'src/editors/string.js',
-          'src/editors/number.js',
-          'src/editors/integer.js',
-          'src/editors/object.js',
-          'src/editors/imageFile.js',
-          'src/editors/array.js',
-          'src/editors/imageFileArray.js',
-          'src/editors/table.js',
-          'src/editors/multiple.js',
-          'src/editors/enum.js',
-          'src/editors/checkbox.js', 
-          'src/editors/select.js',
-          'src/editors/radio.js', 
-          'src/editors/multiselect.js',
-          'src/editors/base64.js',
-          'src/editors/upload.js',
-          'src/editors/signature.js',
+          'imports/src/editor.js',
+          'imports/src/editors/null.js',
+          'imports/src/editors/string.js',
+          'imports/src/editors/number.js',
+          'imports/src/editors/integer.js',
+          'imports/src/editors/object.js',
+          'imports/src/editors/imageFile.js',
+          'imports/src/editors/array.js',
+          'imports/src/editors/imageFileArray.js',
+          'imports/src/editors/table.js',
+          'imports/src/editors/multiple.js',
+          'imports/src/editors/enum.js',
+          'imports/src/editors/checkbox.js', 
+          'imports/src/editors/select.js',
+          'imports/src/editors/radio.js', 
+          'imports/src/editors/multiselect.js',
+          'imports/src/editors/base64.js',
+          'imports/src/editors/upload.js',
+          'imports/src/editors/signature.js',
 
           // All the themes and iconlibs
-          'src/theme.js',
-          'src/themes/*.js',
-          'src/iconlib.js',
-          'src/iconlibs/*.js',
+          'imports/src/theme.js',
+          'imports/src/themes/*.js',
+          'imports/src/iconlib.js',
+          'imports/src/iconlibs/*.js',
 
           // The JS templating engines
-          'src/templates/*.js',
+          'imports/src/templates/*.js',
 
           // Set the defaults
-          'src/defaults.js',
+          'imports/src/defaults.js',
           
           // Wrapper for $.fn style initialization
-          'src/jquery.js',
+          'imports/src/jquery.js',
           
           // End the closure
-          'src/outro.js'
+          'imports/src/outro.js'
         ],
         dest: 'dist/jsoneditor.js'
       }
@@ -74,7 +74,7 @@ module.exports = function(grunt) {
     },
     watch: {
       scripts: {
-        files: ["src/**/*.js"],
+        files: ["imports/src/**/*.js"],
         tasks: ["concat", "uglify"]
       }
     },
@@ -85,39 +85,43 @@ module.exports = function(grunt) {
         nonbsp: true,
         nonew: true,
         immed: true,
-        latedef: true
+        latedef: true,
+        "globals": {
+          "Meteor": true,
+          "MobileRangeSlider": true
+        }
       },
       beforeconcat: [
-        'src/class.js',
-        'src/ie9.js',
+        'imports/src/class.js',
+        'imports/src/ie9.js',
         
         // Utils like extend, each, and trigger
-        'src/utilities.js',
+        'imports/src/utilities.js',
         
         // The main JSONEditor class
-        'src/core.js',
+        'imports/src/core.js',
 
         // JSON Schema validator
-        'src/validator.js',
+        'imports/src/validator.js',
         
         // All the editors
-        'src/editor.js',
-        'src/editors/*.js',
+        'imports/src/editor.js',
+        'imports/src/editors/*.js',
         
         // All the themes and iconlibs
-        'src/theme.js',
-        'src/themes/*.js',
-        'src/iconlib.js',
-        'src/iconlibs/*.js',
+        'imports/src/theme.js',
+        'imports/src/themes/*.js',
+        'imports/src/iconlib.js',
+        'imports/src/iconlibs/*.js',
 
         // The JS templating engines
-        'src/templates/*.js',
+        'imports/src/templates/*.js',
 
         // Set the defaults
-        'src/defaults.js',
+        'imports/src/defaults.js',
         
         // Wrapper for $.fn style initialization
-        'src/jquery.js'
+        'imports/src/jquery.js'
       ],
       afterconcat: {
         options: {

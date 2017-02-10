@@ -300,7 +300,7 @@ JSONEditor.defaults.editors.imageFile = JSONEditor.AbstractEditor.extend({
     if (this.format)
       this.input.setAttribute('data-schemaformat', this.format);
 
-    this.control = this.theme.getFormControl(this.label, this.input, this.description, this.schema);
+    this.control = this.theme.getFormControl(this.label, this.input, this.description, this.schema.info);
     this.container.appendChild(this.control);
 
     // If the Select2 library is loaded

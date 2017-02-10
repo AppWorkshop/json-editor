@@ -3935,7 +3935,7 @@ JSONEditor.defaults.editors.imageFile = JSONEditor.AbstractEditor.extend({
     if (this.format)
       this.input.setAttribute('data-schemaformat', this.format);
 
-    this.control = this.theme.getFormControl(this.label, this.input, this.description, this.schema);
+    this.control = this.theme.getFormControl(this.label, this.input, this.description, this.schema.info);
     this.container.appendChild(this.control);
 
     // If the Select2 library is loaded
@@ -7091,11 +7091,11 @@ JSONEditor.AbstractTheme = Class.extend({
     // attach stylesheet for mobile range slider
     var style = document.createElement('style');
     var rangeCSS =
-            "/* Mobile Range Slider */\n"
-          + ".slider {position: relative; margin: 10px 0; width: 100%; height: 40px;}"
-          + ".track {position: absolute; top: 19px; left: 0; right: 0; height: 3px; background-color: #AAA;}"
-          + ".knob {position: absolute; margin: 0; padding: 0; height: 40px; width: 25px; border-radius: 10px;"
-          + "background: rgb(253,253,253); border: 1px solid rgb(160,160,160); cursor: pointer;}";
+      "/* Mobile Range Slider */\n" +
+      ".slider {position: relative; margin: 10px 0; width: 100%; height: 40px;}" +
+      ".track {position: absolute; top: 19px; left: 0; right: 0; height: 3px; background-color: #AAA;}" +
+      ".knob {position: absolute; margin: 0; padding: 0; height: 40px; width: 25px; border-radius: 10px;" +
+      "background: rgb(253,253,253); border: 1px solid rgb(160,160,160); cursor: pointer;}";
 
     style.textContent = rangeCSS;
 
