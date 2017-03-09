@@ -142,14 +142,14 @@ JSONEditor.AbstractTheme = Class.extend({
     var el = document.createElement('div');
 
     if(label) {
-      label.style.display = 'block';
+      // label.style.display = 'block';
       el.appendChild(label);
     }
 
     for(var i in controls) {
       if(!controls.hasOwnProperty(i)) continue;
-      controls[i].style.display = 'inline-block';
-      controls[i].style.marginRight = '20px';
+      // controls[i].style.display = 'inline-block';
+      // controls[i].style.marginRight = '20px';
       el.appendChild(controls[i]);
     }
 

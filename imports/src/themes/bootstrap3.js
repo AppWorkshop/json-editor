@@ -38,11 +38,11 @@ JSONEditor.defaults.themes.bootstrap3 = JSONEditor.AbstractTheme.extend({
 
     if(label && input.getAttribute('type') === 'checkbox') {
       label.className += ' checkbox';
-      label.appendChild(input);
       // add an empty span inside the label, alongside the checkbox.
       var emptySpan = document.createElement('span');
       emptySpan.setAttribute('class','checkbox-target');
-      label.appendChild(emptySpan);
+      label.insertBefore(emptySpan, label.firstChild);
+      label.insertBefore(input, label.firstChild);
       group.appendChild(label);
 //      input.style.position = 'relative';
 //      input.style.cssFloat = 'left';

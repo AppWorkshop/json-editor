@@ -7223,14 +7223,14 @@ JSONEditor.AbstractTheme = Class.extend({
     var el = document.createElement('div');
 
     if(label) {
-      label.style.display = 'block';
+      // label.style.display = 'block';
       el.appendChild(label);
     }
 
     for(var i in controls) {
       if(!controls.hasOwnProperty(i)) continue;
-      controls[i].style.display = 'inline-block';
-      controls[i].style.marginRight = '20px';
+      // controls[i].style.display = 'inline-block';
+      // controls[i].style.marginRight = '20px';
       el.appendChild(controls[i]);
     }
 
@@ -7701,11 +7701,11 @@ JSONEditor.defaults.themes.bootstrap3 = JSONEditor.AbstractTheme.extend({
 
     if(label && input.getAttribute('type') === 'checkbox') {
       label.className += ' checkbox';
-      label.appendChild(input);
       // add an empty span inside the label, alongside the checkbox.
       var emptySpan = document.createElement('span');
       emptySpan.setAttribute('class','checkbox-target');
-      label.appendChild(emptySpan);
+      label.insertBefore(emptySpan, label.firstChild);
+      label.insertBefore(input, label.firstChild);
       group.appendChild(label);
 //      input.style.position = 'relative';
 //      input.style.cssFloat = 'left';
