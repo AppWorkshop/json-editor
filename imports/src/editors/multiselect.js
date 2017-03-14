@@ -35,6 +35,7 @@ JSONEditor.defaults.editors.multiselect = JSONEditor.AbstractEditor.extend({
       }
 
       this.control = this.theme.getMultiCheckboxHolder(this.controls,this.label,this.description);
+      this.schema.multiple = true;
     }
     else {
       this.input_type = 'select';
