@@ -227,7 +227,10 @@ JSONEditor.Validator = Class.extend({
         }
         if (schema.requiredIf.disableOtherwise) {
           // make sure it's enabled
-          this.jsoneditor.getEditor(path).enable();
+          var editorForPath = this.jsoneditor.getEditor(path)
+          if (editorForPath) {
+            editorForPath.enable();
+          }
         }
       } else {
         if (schema.requiredIf.hideOtherwise) {
@@ -236,7 +239,10 @@ JSONEditor.Validator = Class.extend({
         }
         if (schema.requiredIf.disableOtherwise) {
           // we need to disable this one.
-          this.jsoneditor.getEditor(path).disable();
+          var editorForPath = this.jsoneditor.getEditor(path)
+          if (editorForPath) {
+            editorForPath.disable();
+          }
         }
       }
       if (hasError) {
