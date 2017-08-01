@@ -260,10 +260,18 @@ JSONEditor.defaults.editors.imageFile = JSONEditor.AbstractEditor.extend({
                     // set it up once the thumbnail has been loaded.
                     var imageObj = new Image();
                     imageObj.onload = function () {
+                      var width = this.width;
+                      var height = this.height;
+                      // chrome doesn't seem to want to set a width and height.
+                      // get them from the thumbnail if we can.
+                      if (!width && !height) {
+                        width = imgelem.naturalWidth;
+                        height = imgelem.naturalHeight;
+                      }
                       var valueObj = {
                         "dataURI": this.src,
-                        "width": this.width,
-                        "height": this.height,
+                        "width": width,
+                        "height": height,
                         "name": file.name,
                         "size": file.size,
                         "type": file.type,
