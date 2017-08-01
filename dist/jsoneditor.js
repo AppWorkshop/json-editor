@@ -3818,7 +3818,7 @@ JSONEditor.defaults.editors.imageFile = JSONEditor.AbstractEditor.extend({
                     quality: 75, 
                     sourceType: Camera.PictureSourceType.CAMERA,
                     destinationType: Camera.DestinationType.FILE_URI,
-                    correctOrientation: true,
+                    // correctOrientation: true,
                     allowEdit: true,
                     encodingType: Camera.EncodingType.JPEG
                   });
