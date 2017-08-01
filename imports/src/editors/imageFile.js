@@ -196,6 +196,8 @@ JSONEditor.defaults.editors.imageFile = JSONEditor.AbstractEditor.extend({
                 // set it up once the thumbnail has been loaded.
                 var imageObj = new Image();
                 imageObj.onload = function () {
+                  var type, name = this.src; 
+
                   var valueObj = {
                     "dataURI": this.src,
                     "width": this.width,
@@ -206,6 +208,11 @@ JSONEditor.defaults.editors.imageFile = JSONEditor.AbstractEditor.extend({
 //                        "type": file.type,
 //                        "lastModificationDate": file.lastModifiedDate
                   };
+                  // try to derive image type from file name
+                  if (name.indexOf('.') !== -1) {
+                    // has an extension; use it for type
+                    valueObj.type = name.split('.')[1];
+                  }
                   // if filename doesn't have an extension, try to derive one from the file type
 //                      if (file.name.indexOf(".") === -1) {
 //                        if (file.type.indexOf("/") !== -1) {
