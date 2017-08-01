@@ -173,12 +173,20 @@ JSONEditor.defaults.editors.imageFile = JSONEditor.AbstractEditor.extend({
               function obtainPicture(buttonIndex) {
                 if (buttonIndex === 1) {
                   // take a new photo
-                  navigator.camera.getPicture(onImageChosenSuccess, onImageNotChosenFail, {quality: 75, destinationType: Camera.DestinationType.FILE_URI});
+                  navigator.camera.getPicture(onImageChosenSuccess, onImageNotChosenFail, {
+                    quality: 75, 
+                    sourceType: Camera.PictureSourceType.CAMERA,
+                    destinationType: Camera.DestinationType.FILE_URI,
+                    correctOrientation: true,
+                    allowEdit: true,
+                    encodingType: Camera.EncodingType.JPEG
+                  });
 
                 } else {
                   // Choose one from the library
                   navigator.camera.getPicture(onImageChosenSuccess, onImageNotChosenFail, {
                     quality: 75,
+                    correctOrientation: true,
                     destinationType: Camera.DestinationType.FILE_URI,
                     sourceType: Camera.PictureSourceType.PHOTOLIBRARY,
                     encodingType: Camera.EncodingType.JPEG,
