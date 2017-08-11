@@ -182,7 +182,12 @@ JSONEditor.AbstractTheme = Class.extend({
     select.innerHTML = '';
     for(var i=0; i<options.length; i++) {
       var option = document.createElement('option');
-      option.setAttribute('value',options[i]);
+      if (options[i] === "__null__") {
+        // option.setAttribute('disabled', true);
+        option.setAttribute('selected', true);
+      } else {
+        option.setAttribute('value',options[i]);
+      }
       option.textContent = titles[i] || options[i];
       select.appendChild(option);
     }

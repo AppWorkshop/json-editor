@@ -106,6 +106,12 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
         self.enum_display[i] = "" + (display[i] || option);
         self.enum_values[i] = self.typecast(option);
       });
+
+      if ( this.schema.emptyFirstField ) {
+        self.enum_options.unshift("" + "__null__");
+        self.enum_display.unshift("" + "Choose your option");
+        self.enum_values.unshift("" + "__null__");
+      }
     }
     // Boolean
     else if (this.schema.type === "boolean") {

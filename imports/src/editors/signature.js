@@ -204,7 +204,6 @@ JSONEditor.defaults.editors.signature = JSONEditor.AbstractEditor.extend({
         canvas.height = h;
       }
     }
-
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
 

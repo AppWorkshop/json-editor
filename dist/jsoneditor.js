@@ -1008,9 +1008,9 @@ JSONEditor.Validator = Class.extend({
         }
         if (schema.requiredIf.disableOtherwise) {
           // make sure it's enabled
-          var editorForPath = this.jsoneditor.getEditor(path)
-          if (editorForPath) {
-            editorForPath.enable();
+          var disabledEditorForPath = this.jsoneditor.getEditor(path);
+          if (disabledEditorForPath) {
+            disabledEditorForPath.enable();
           }
         }
       } else {
@@ -1020,9 +1020,9 @@ JSONEditor.Validator = Class.extend({
         }
         if (schema.requiredIf.disableOtherwise) {
           // we need to disable this one.
-          var editorForPath = this.jsoneditor.getEditor(path)
-          if (editorForPath) {
-            editorForPath.disable();
+          var enabledEditorForPath = this.jsoneditor.getEditor(path);
+          if (enabledEditorForPath) {
+            enabledEditorForPath.disable();
           }
         }
       }
@@ -5973,6 +5973,12 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
         self.enum_display[i] = "" + (display[i] || option);
         self.enum_values[i] = self.typecast(option);
       });
+
+      if ( this.schema.emptyFirstField ) {
+        self.enum_options.unshift("" + "__null__");
+        self.enum_display.unshift("" + "Choose your option");
+        self.enum_values.unshift("" + "__null__");
+      }
     }
     // Boolean
     else if (this.schema.type === "boolean") {
@@ -7060,7 +7066,6 @@ JSONEditor.defaults.editors.signature = JSONEditor.AbstractEditor.extend({
         canvas.height = h;
       }
     }
-
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
 
@@ -7293,7 +7298,12 @@ JSONEditor.AbstractTheme = Class.extend({
     select.innerHTML = '';
     for(var i=0; i<options.length; i++) {
       var option = document.createElement('option');
-      option.setAttribute('value',options[i]);
+      if (options[i] === "__null__") {
+        // option.setAttribute('disabled', true);
+        option.setAttribute('selected', true);
+      } else {
+        option.setAttribute('value',options[i]);
+      }
       option.textContent = titles[i] || options[i];
       select.appendChild(option);
     }
