@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <title>JSON Editor Upload Example</title>
     <script src="../dist/jsoneditor.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src='mule.js'></script>
   </head>
   <body>
     <h1>JSON Editor Upload Example</h1>
@@ -12,31 +14,69 @@
     <button id='submit'>Submit (console.log)</button>
     
     <script>
+      var settings = {
+        ajaxBase: "http://mc.ju.to:4000",
+        acceptedExtensions: "jpg,jpeg,png,gif",
+//        access_key: "AKIAIEQOKEPZ4CBP43RA",
+        accessKey: "AKIAJPBLFYQ4PTPNJ2OA",
+        contentType: "application/octet-stream",
+        bucket: "pdffiles-develop.ju.to",
+        region: "ap-southeast-2",
+        key: "742516",
+
+        max_size: 50 * (1 << 30) // 50 gb
+      };
+
       // Specify theme
       JSONEditor.defaults.options.theme = 'html';
 
       // Specify upload handler
       JSONEditor.defaults.options.upload = function(type, file, cbs) {
-        if (type === 'root.upload_fail') cbs.failure('Upload failed');
+        console.log(type); // seems to be "root.upload_default"
+        console.log(file); // the HTML5 file object
+        console.log(cbs); // { failure(err){...}, success(url){...}, updateProgress(progress){....}
+        if (type === 'root.upload_fail') {
+          console.log("fail... ")
+          cbs.failure('Upload failed');
+
+        }
         else {
-          var tick = 0;
+          settings.file = file;
+          settings.autostart = false;
 
-          var tickFunction = function() {
-            tick += 1;
-            console.log('progress: ' + tick);
-
-            if (tick < 100) {
-              cbs.updateProgress(tick);
-              window.setTimeout(tickFunction, 50)
-            } else if (tick == 100) {
-              cbs.updateProgress();
-              window.setTimeout(tickFunction, 500)
-            } else {
-              cbs.success('http://www.example.com/images/' + file.name);
-            }
+            settings.onError =  function(err) {
+            console.log(`error_callback : ${err}`);
           };
+             settings.onSelect =  function(fileObj) {
+              console.log(`onSelect : ${fileObj}`);
+            };
+             settings.onStart =  function(fileObj) {
+              console.log(`onStart : ${fileObj}`);
+            };
+             settings.onProgress =  function(bytes_uploaded, bytes_total) {
+              console.log(`onProgress : ${bytes_uploaded}; ${bytes_total}`);
+              cbs.updateProgress((100 * bytes_uploaded) / bytes_total);
+            };
+             settings.onInit =  function() {
+              console.log(`onInit`);
+            };
+             settings.onComplete =  function() {
+               var url = `http://${settings.bucket}.s3.amazonaws.com/${settings.key}`;
 
-          window.setTimeout(tickFunction)
+               console.log(`onComplete: ${url}`);
+               cbs.success(url);
+            };
+             settings.onChunkProgress =  function(param) {
+              console.log(`onChunkProgress`);
+            };
+             settings.onChunkUploaded =  function() {
+              console.log(`onChunkUploaded`);
+            };
+
+                 
+          
+          let upload = muleUploader(settings);
+          upload.uploadFile(file, false);
         }
       };
 
@@ -117,5 +157,14 @@
         console.log(editor.getValue());
       });
     </script>
+
+    <div class="progress progress-striped active">
+      <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0">
+      </div>
+    </div>
+    <div style="clear: both"></div>
+    <textarea id="log" rows="10" class="form-control"></textarea>
+    <br/>
+
   </body>
 </html>
