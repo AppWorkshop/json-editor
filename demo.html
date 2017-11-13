@@ -7,8 +7,10 @@
     <!-- placeholders for the theme switcher -->
     <link rel='stylesheet' id='theme_stylesheet'>
     <link rel='stylesheet' id='icon_stylesheet'>
-
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" type="text/css">
     <style>[class*="foundicon-"] {font-family: GeneralFoundicons;font-style: normal;}</style>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src='dist/jsoneditor.js'></script>
     <!-- This library is used to provide direct links to the demo.  It is not required for JSON Editor -->
     <script src='https://cdn.rawgit.com/pieroxy/lz-string/master/libs/lz-string.min.js'></script>
@@ -107,7 +109,7 @@
           <div class='span12 col-md-12 columns twelve large-12 col m12'>
             <h2>Code</h2>
             <pre><code>// Set default options
-JSONEditor.defaults.options.theme = 'bootstrap2';
+JSONEditor.defaults.options.theme = 'bootstrap3';
 
 // Initialize the editor
 var editor = new JSONEditor(document.getElementById("editor_holder"),{
@@ -177,6 +179,14 @@ editor.on("change",  function() {
                       "default": "currentPatientID",
                       "readonly": true
                   },
+                "imgData": {
+                  "title": "Simpsons Imaginary",
+                  "type": "string",
+                  "media": {
+                    "binaryEncoding": "base64",
+                    "type": "image/png"
+                  }
+                },
                   "bleeding_diathesis-2": {
                       "field_type": "radio",
                       "demoTemplateUrl": "./views/directive-templates/field/radio.html",

@@ -1,170 +1,133 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>JSON Editor Upload Example</title>
-    <script src="../dist/jsoneditor.js"></script>
-    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-    <script src='mule.js'></script>
-  </head>
-  <body>
-    <h1>JSON Editor Upload Example</h1>
-    
-    <div id='editor_holder'></div>
-    <button id='submit'>Submit (console.log)</button>
-    
-    <script>
-      var settings = {
-        ajaxBase: "http://mc.ju.to:4000",
-        acceptedExtensions: "jpg,jpeg,png,gif",
+<head>
+  <meta charset="utf-8"/>
+  <title>JSON Editor Upload Example</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" type="text/css">
+  <style>[class*="foundicon-"] {
+    font-family: GeneralFoundicons;
+    font-style: normal;
+  }</style>
+  <!--<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>-->
+  <script src="../dist/jsoneditor.js"></script>
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src='mule.js'></script>
+</head>
+<body>
+<h1>JSON Editor Upload Example</h1>
+
+<div id='editor_holder'></div>
+<button id='submit'>Submit (console.log)</button>
+
+<script>
+  var settings = {
+    ajaxBase: "http://mc.ju.to:4000",
+//    acceptedExtensions: "jpg,jpeg,png,gif",
 //        access_key: "AKIAIEQOKEPZ4CBP43RA",
-        accessKey: "AKIAJPBLFYQ4PTPNJ2OA",
-        contentType: "application/octet-stream",
-        bucket: "pdffiles-develop.ju.to",
-        region: "ap-southeast-2",
-        key: "742516",
+    accessKey: "AKIAJPBLFYQ4PTPNJ2OA",
+    contentType: "application/octet-stream",
+    bucket: "pdffiles-develop.ju.to",
+    region: "ap-southeast-2",
+    key: "742516",
 
-        max_size: 50 * (1 << 30) // 50 gb
+    max_size: 50 * (1 << 30) // 50 gb
+  };
+
+  // Specify theme
+  JSONEditor.defaults.options.theme = 'bootstrap3';
+
+  // Specify upload handler
+  JSONEditor.defaults.options.upload = function (type, file, cbs) {
+    console.log(type); // seems to be "root.upload_default"
+    console.log(file); // the HTML5 file object
+    console.log(cbs); // { failure(err){...}, success(url){...}, updateProgress(progress){....}
+    if (type === 'root.upload_fail') {
+      console.log("fail... ")
+      cbs.failure('Upload failed');
+
+    }
+    else {
+      settings.file = file;
+      settings.autostart = false;
+
+      settings.onError = function (err) {
+        console.log(`error_callback : ${err}`);
+        cbs.failure(err);
+      };
+      settings.onSelect = function (fileObj) {
+//        console.log(`onSelect : ${fileObj}`);
+      };
+      settings.onStart = function (fileObj) {
+//        console.log(`onStart : ${fileObj}`);
+      };
+      settings.onProgress = function (bytes_uploaded, bytes_total) {
+//        console.log(`onProgress : ${bytes_uploaded}; ${bytes_total}`);
+        let progress = (100 * bytes_uploaded) / bytes_total;
+        cbs.updateProgress(progress.toFixed(2));
+      };
+      settings.onInit = function () {
+//        console.log(`onInit`);
+      };
+      settings.onComplete = function () {
+        let url = `http://${settings.bucket}.s3.amazonaws.com/${settings.key}`;
+
+        console.log(`onComplete: ${url}`);
+        cbs.success(url);
+      };
+      settings.onChunkProgress = function (param) {
+//        console.log(`onChunkProgress`);
+      };
+      settings.onChunkUploaded = function () {
+//        console.log(`onChunkUploaded`);
       };
 
-      // Specify theme
-      JSONEditor.defaults.options.theme = 'html';
 
-      // Specify upload handler
-      JSONEditor.defaults.options.upload = function(type, file, cbs) {
-        console.log(type); // seems to be "root.upload_default"
-        console.log(file); // the HTML5 file object
-        console.log(cbs); // { failure(err){...}, success(url){...}, updateProgress(progress){....}
-        if (type === 'root.upload_fail') {
-          console.log("fail... ")
-          cbs.failure('Upload failed');
+      let upload = muleUploader(settings);
+      upload.uploadFile(file, false);
+    }
+  };
 
-        }
-        else {
-          settings.file = file;
-          settings.autostart = false;
-
-            settings.onError =  function(err) {
-            console.log(`error_callback : ${err}`);
-          };
-             settings.onSelect =  function(fileObj) {
-              console.log(`onSelect : ${fileObj}`);
-            };
-             settings.onStart =  function(fileObj) {
-              console.log(`onStart : ${fileObj}`);
-            };
-             settings.onProgress =  function(bytes_uploaded, bytes_total) {
-              console.log(`onProgress : ${bytes_uploaded}; ${bytes_total}`);
-              cbs.updateProgress((100 * bytes_uploaded) / bytes_total);
-            };
-             settings.onInit =  function() {
-              console.log(`onInit`);
-            };
-             settings.onComplete =  function() {
-               var url = `http://${settings.bucket}.s3.amazonaws.com/${settings.key}`;
-
-               console.log(`onComplete: ${url}`);
-               cbs.success(url);
-            };
-             settings.onChunkProgress =  function(param) {
-              console.log(`onChunkProgress`);
-            };
-             settings.onChunkUploaded =  function() {
-              console.log(`onChunkUploaded`);
-            };
-
-                 
-          
-          let upload = muleUploader(settings);
-          upload.uploadFile(file, false);
-        }
-      };
-
-      // Initialize the editor with a JSON schema
-      var editor = new JSONEditor(document.getElementById('editor_holder'),{
-        schema: {
-          type: "object",
-          title: "Image",
-          properties: {
-            upload_default: {
-              type: "string",
-              format: "url",
-              options: {
-                upload: true
-              },
-              "links": [
-                {
-                    "href": "{{self}}"
-                }
-              ]
-            },
-            upload_custom_link: {
-              type: "string",
-              format: "url",
-              options: {
-                upload: true
-              },
-              "links": [
-                {
-                  "href": "{{self}}",
-                  "rel": "view"
-                }
-              ]
-            },
-            upload_readonly: {
-              readonly: true,
-              type: "string",
-              format: "url",
-              options: {
-                upload: true
-              },
-              "links": [
-                {
-                  "href": "{{self}}"
-                }
-              ]
-            },
-            upload_fail: {
-              type: "string",
-              format: "url",
-              options: {
-                upload: true
-              },
-              "links": [
-                {
-                  "href": "{{self}}"
-                }
-              ]
-            },
-            name: {
-              type: "string"
+  // Initialize the editor with a JSON schema
+  var editor = new JSONEditor(document.getElementById('editor_holder'), {
+    schema: {
+      type: "object",
+      title: "Image",
+      properties: {
+        upload_default: {
+          type: "string",
+          format: "url",
+          options: {
+            upload: true
+          },
+          "links": [
+            {
+              "href": "{{self}}"
             }
-          }
+          ]
         }
-      });
+      }
+    }
+  });
 
-      editor.setValue({
-        upload_default: "",
-        upload_custom_link: "",
-        upload_readonly: "http://www.example.com/images/image.jpg",
-        upload_fail: "",
-        name: ""
-      });
-      
-      // Hook up the submit button to log to the console
-      document.getElementById('submit').addEventListener('click',function() {
-        // Get the value from the editor
-        console.log(editor.getValue());
-      });
-    </script>
+  editor.setValue({
+    upload_default: "http://example.com/image.jpeg"
+  });
 
-    <div class="progress progress-striped active">
-      <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0">
-      </div>
-    </div>
-    <div style="clear: both"></div>
-    <textarea id="log" rows="10" class="form-control"></textarea>
-    <br/>
+  // Hook up the submit button to log to the console
+  document.getElementById('submit').addEventListener('click', function () {
+    // Get the value from the editor
+    console.log(editor.getValue());
+  });
+</script>
 
-  </body>
+<div class="progress progress-striped active">
+  <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0">
+  </div>
+</div>
+<div style="clear: both"></div>
+<textarea id="log" rows="10" class="form-control"></textarea>
+<br/>
+
+</body>
 </html>

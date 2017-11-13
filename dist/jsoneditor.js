@@ -3676,17 +3676,6 @@ JSONEditor.defaults.editors.imageFile = JSONEditor.AbstractEditor.extend({
 
     this.input.value = sanitized;
 
-    // If using SCEditor, update the WYSIWYG
-    if (this.sceditor_instance) {
-      this.sceditor_instance.val(sanitized);
-    }
-    else if (this.epiceditor) {
-      this.epiceditor.importFile(null, sanitized);
-    }
-    else if (this.ace_editor) {
-      this.ace_editor.setValue(sanitized);
-    }
-
     var changed = from_template || this.getValue() !== value;
 
     this.refreshValue();
@@ -3971,37 +3960,22 @@ JSONEditor.defaults.editors.imageFile = JSONEditor.AbstractEditor.extend({
     this.control = this.theme.getFormControl(this.label, this.input, this.description, this.schema.info);
     this.container.appendChild(this.control);
 
-    // If the Select2 library is loaded
-    if (this.input_type === "select" && window.$ && $.fn && $.fn.select2) {
-      $(this.input).select2();
-    }
-
     // Any special formatting that needs to happen after the input is added to the dom
     requestAnimationFrame(function () {
       self.afterInputReady();
     });
 
-    // Compile and store the template
-    if (this.schema.template) {
-      this.template = this.jsoneditor.compileTemplate(this.schema.template, this.template_engine);
-      this.refreshValue();
-      this.jsoneditor.notifyWatchers(this.path);
-    }
-    else {
-      this.refreshValue();
-      this.jsoneditor.notifyWatchers(this.path);
-    }
+    this.refreshValue();
+    this.jsoneditor.notifyWatchers(this.path);
   },
   enable: function () {
     if (!this.always_disabled) {
       this.input.disabled = false;
-      // TODO: WYSIWYG and Markdown editors
     }
     this._super();
   },
   disable: function () {
     this.input.disabled = true;
-    // TODO: WYSIWYG and Markdown editors
     this._super();
   },
   afterInputReady: function () {
@@ -4045,92 +4019,6 @@ JSONEditor.defaults.editors.imageFile = JSONEditor.AbstractEditor.extend({
     if (this.template) {
       vars = this.getWatchedFieldValues();
       this.setValue(this.template(vars), false, true);
-    }
-    // If this editor uses a dynamic select box
-    if (this.enumSource) {
-      vars = this.getWatchedFieldValues();
-      var select_options = [];
-      var select_titles = [];
-
-      for (var i = 0; i < this.enumSource.length; i++) {
-        var j;
-        // Constant values
-        if (this.enumSource[i] instanceof Array) {
-          select_options = select_options.concat(this.enumSource[i]);
-          select_titles = select_titles.concat(this.enumSource[i]);
-        }
-        // A watched field
-        else if (vars[this.enumSource[i].source]) {
-          var items = vars[this.enumSource[i].source];
-
-          // Only use a predefined part of the array
-          if (this.enumSource[i].slice) {
-            items = Array.prototype.slice.apply(items, this.enumSource[i].slice);
-          }
-          // Filter the items
-          if (this.enumSource[i].filter) {
-            var new_items = [];
-            for (j = 0; j < items.length; j++) {
-              if (filter({i: j, item: items[j]}))
-                new_items.push(items[j]);
-            }
-            items = new_items;
-          }
-
-          var item_titles = [];
-          var item_values = [];
-          for (j = 0; j < items.length; j++) {
-            var item = items[j];
-
-            // Rendered value
-            if (this.enumSource[i].value) {
-              item_values[j] = this.enumSource[i].value({
-                i: j,
-                item: item
-              });
-            }
-            // Use value directly
-            else {
-              item_values[j] = items[j];
-            }
-
-            // Rendered title
-            if (this.enumSource[i].title) {
-              item_titles[j] = this.enumSource[i].title({
-                i: j,
-                item: item
-              });
-            }
-            // Use value as the title also
-            else {
-              item_titles[j] = item_values[j];
-            }
-          }
-
-          // TODO: sort
-
-          select_options = select_options.concat(item_values);
-          select_titles = select_titles.concat(item_titles);
-        }
-      }
-
-      this.theme.setSelectOptions(this.input, select_options, select_titles);
-      this.select_options = select_options;
-
-      // If the previous value is still in the new select options, stick with it
-      if (select_options.indexOf(this.value) !== -1) {
-        this.input.value = this.value;
-      }
-      // Otherwise, set the value to the first select option
-      else {
-        this.input.value = select_options[0];
-        this.value = select_options[0] || "";
-        if (this.parent)
-          this.parent.onChildEditorChange(this);
-        else
-          this.jsoneditor.onChange();
-        this.jsoneditor.notifyWatchers(this.path);
-      }
     }
 
     this._super();
@@ -6740,28 +6628,97 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
     // Input that holds the base64 string
     this.input = this.theme.getFormInputField('hidden');
     this.container.appendChild(this.input);
-    
+
     // Don't show uploader if this is readonly
     if(!this.schema.readOnly && !this.schema.readonly) {
 
       if(!this.jsoneditor.options.upload) throw "Upload handler required for upload editor";
 
+      // inspired by:
+      //  http://stackoverflow.com/a/18803568/956779
+      var divElem = document.createElement('div');
+      divElem.setAttribute("class", "image-upload");
+
+      var fileInput = this.theme.getFormInputField('file');
+      this.uploader = fileInput;
+      fileInput.setAttribute("accept", "image/*");
+      fileInput.setAttribute("class", "hidden");
+      var uuid = $uuid();
+      fileInput.setAttribute("id", uuid);
+
+      var labelElem = document.createElement('label');
+      labelElem.setAttribute("for", uuid);
+      var placeholderImg = document.createElement('img');
+      //TODO make this an option rather than a hard-coded image.
+      // An add-image image. stops us getting nasty broken image icons. This becomes a button.
+      placeholderImg.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBoZWlnaHQ9IjQ4cHgiIGlkPSJMYXllcl8xIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1MTIgNTEyOyIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiIgd2lkdGg9IjQ4cHgiIHhtbDpzcGFjZT0icHJlc2VydmUiPgogIDxnPgogICAgPGc+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGQ9Ik0yNTYgNDhDMTQxLjEgNDggNDggMTQxLjEgNDggMjU2czkzLjEgMjA4IDIwOCAyMDhjMTE0LjkgMCAyMDgtOTMuMSAyMDgtMjA4UzM3MC45IDQ4IDI1NiA0OHogTTI1NiA0NDYuNyBjLTEwNS4xIDAtMTkwLjctODUuNS0xOTAuNy0xOTAuN1MxNTAuOSA2NS4zIDI1NiA2NS4zUzQ0Ni43IDE1MC45IDQ0Ni43IDI1NlMzNjEuMSA0NDYuNyAyNTYgNDQ2Ljd6Ii8+CiAgICAgIDwvZz4KICAgIDwvZz4KICAgIDxnPgogICAgICA8cG9seWdvbiBwb2ludHM9IjI2NC4xLDEyOCAyNDcuMywxMjggMjQ3LjMsMjQ3LjkgMTI4LDI0Ny45IDEyOCwyNjQuNyAyNDcuMywyNjQuNyAyNDcuMywzODQgMjY0LjEsMzg0IDI2NC4xLDI2NC43IDM4NCwyNjQuNyAzODQsMjQ3LjkgMjY0LjEsMjQ3LjkiLz4KICAgIDwvZz4KICA8L2c+Cjwvc3ZnPgo=";
+
+      labelElem.appendChild(placeholderImg);
+
+      divElem.appendChild(labelElem);
+      divElem.appendChild(fileInput);
+
+      this.input = divElem;
+      this.input_type = 'file';
+
       // File uploader
-      this.uploader = this.theme.getFormInputField('file');
-      
-      this.uploader.addEventListener('change',function(e) {
+      // this.uploader = this.theme.getFormInputField('file');
+
+      if (this.schema.readOnly || this.schema.readonly || this.schema.template) {
+        this.always_disabled = true;
+        this.input.disabled = true;
+      }
+
+      var eventName = 'change';
+      if ((typeof cordova !== "undefined") && (cordova.platformId === "android")) {
+        // the 'change' event doesn't seem to fire on android
+        eventName = 'click';
+      }
+
+      this.uploader.addEventListener(eventName,function(e) {
         e.preventDefault();
         e.stopPropagation();
         
         if(this.files && this.files.length) {
-          var fr = new FileReader();
-          fr.onload = function(evt) {
-            self.preview_value = evt.target.result;
-            self.refreshPreview();
-            self.onChange(true);
-            fr = null;
-          };
-          fr.readAsDataURL(this.files[0]);
+          var objectURL = window.URL.createObjectURL(this.files[0]);
+
+          // var fr = new FileReader();
+          // fr.onload = function(evt) {
+          self.preview_value = e.target.result;
+          self.refreshPreview(objectURL);
+          self.onChange(true);
+          // fr = null;
+
+          self.theme.removeInputError(self.uploader);
+
+          if (self.theme.getProgressBar) {
+            self.progressBar = self.theme.getProgressBar();
+            self.preview.appendChild(self.progressBar);
+          }
+
+          self.jsoneditor.options.upload(self.path, this.files[0], {
+            success: function(url) {
+              self.setValue(url);
+
+              if(self.parent) self.parent.onChildEditorChange(self);
+              else self.jsoneditor.onChange();
+
+              if (self.progressBar) self.preview.removeChild(self.progressBar);
+            },
+            failure: function(error) {
+              self.theme.addInputError(self.uploader, error);
+              if (self.progressBar) self.preview.removeChild(self.progressBar);
+            },
+            updateProgress: function(progress) {
+              if (self.progressBar) {
+                if (progress) self.theme.updateProgressBar(self.progressBar, progress);
+                else self.theme.updateProgressBarUnknown(self.progressBar);
+              }
+            }
+          });
+
+          // };
+
         }
       });
     }
@@ -6769,75 +6726,85 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
     var description = this.schema.description;
     if (!description) description = '';
 
+
+    // this.control = this.theme.getFormControl(this.label, this.uploader||this.input, this.preview);
+    this.control = this.theme.getFormControl(this.label, this.input, this.description, this.schema.info);
+    this.container.appendChild(this.control);
     this.preview = this.theme.getFormInputDescription(description);
     this.container.appendChild(this.preview);
-
-    this.control = this.theme.getFormControl(this.label, this.uploader||this.input, this.preview);
-    this.container.appendChild(this.control);
   },
-  refreshPreview: function() {
-    if(this.last_preview === this.preview_value) return;
-    this.last_preview = this.preview_value;
+  refreshPreview: function(objectURL) {
+    // if(this.last_preview === this.preview_value) return;
+    // this.last_preview = this.preview_value;
 
-    this.preview.innerHTML = '';
-    
-    if(!this.preview_value) return;
+    imgelem = this.container.querySelector("img");
+    imgelem.src = objectURL;
+    //TODO: Move this to theme and make it more flexible.
+    imgelem.style.maxWidth = "25%";
+    imgelem.style.maxHeight = "25%";
 
-    var self = this;
 
-    var mime = this.preview_value.match(/^data:([^;,]+)[;,]/);
-    if(mime) mime = mime[1];
-    if(!mime) mime = 'unknown';
-
-    var file = this.uploader.files[0];
-
-    this.preview.innerHTML = '<strong>Type:</strong> '+mime+', <strong>Size:</strong> '+file.size+' bytes';
-    if(mime.substr(0,5)==="image") {
-      this.preview.innerHTML += '<br>';
-      var img = document.createElement('img');
-      img.style.maxWidth = '100%';
-      img.style.maxHeight = '100px';
-      img.src = this.preview_value;
-      this.preview.appendChild(img);
-    }
-
-    this.preview.innerHTML += '<br>';
-    var uploadButton = this.getButton('Upload', 'upload', 'Upload');
-    this.preview.appendChild(uploadButton);
-    uploadButton.addEventListener('click',function(event) {
-      event.preventDefault();
-
-      uploadButton.setAttribute("disabled", "disabled");
-      self.theme.removeInputError(self.uploader);
-
-      if (self.theme.getProgressBar) {
-        self.progressBar = self.theme.getProgressBar();
-        self.preview.appendChild(self.progressBar);
-      }
-
-      self.jsoneditor.options.upload(self.path, file, {
-        success: function(url) {
-          self.setValue(url);
-
-          if(self.parent) self.parent.onChildEditorChange(self);
-          else self.jsoneditor.onChange();
-
-          if (self.progressBar) self.preview.removeChild(self.progressBar);
-          uploadButton.removeAttribute("disabled");
-        },
-        failure: function(error) {
-          self.theme.addInputError(self.uploader, error);
-          if (self.progressBar) self.preview.removeChild(self.progressBar);
-          uploadButton.removeAttribute("disabled");
-        },
-        updateProgress: function(progress) {
-          if (self.progressBar) {
-            if (progress) self.theme.updateProgressBar(self.progressBar, progress);
-            else self.theme.updateProgressBarUnknown(self.progressBar);
-          }
-        }
-      });
-    });
+    // this.preview.innerHTML = '';
+    //
+    //
+    // var self = this;
+    //
+    // var file = this.uploader.files[0];
+    //
+    // var mime = file.type;
+    // this.preview.innerHTML = '<strong>Type:</strong> '+mime+', <strong>Size:</strong> '+file.size+' bytes';
+    // if((!mime) || mime.substr(0,5)==="image") {
+    //   this.preview.innerHTML += '<br>';
+    //   var img = document.createElement('img');
+    //   img.style.maxWidth = '100%';
+    //   img.style.maxHeight = '100px';
+    //   if (objectURL) {
+    //     img.src = objectURL;
+    //     img.onload = function() {
+    //       window.URL.revokeObjectURL(objectURL);
+    //     }
+    //
+    //   }
+    //   this.preview.appendChild(img);
+    // }
+    //
+    // this.preview.innerHTML += '<br>';
+    // var uploadButton = this.getButton('Upload', 'upload', 'Upload');
+    // this.preview.appendChild(uploadButton);
+    // uploadButton.addEventListener('click',function(event) {
+    //   event.preventDefault();
+    //
+    //   uploadButton.setAttribute("disabled", "disabled");
+      // self.theme.removeInputError(self.uploader);
+      //
+      // if (self.theme.getProgressBar) {
+      //   self.progressBar = self.theme.getProgressBar();
+      //   self.preview.appendChild(self.progressBar);
+      // }
+      //
+      // self.jsoneditor.options.upload(self.path, file, {
+      //   success: function(url) {
+      //     self.setValue(url);
+      //
+      //     if(self.parent) self.parent.onChildEditorChange(self);
+      //     else self.jsoneditor.onChange();
+      //
+      //     if (self.progressBar) self.preview.removeChild(self.progressBar);
+      //     uploadButton.removeAttribute("disabled");
+      //   },
+      //   failure: function(error) {
+      //     self.theme.addInputError(self.uploader, error);
+      //     if (self.progressBar) self.preview.removeChild(self.progressBar);
+      //     uploadButton.removeAttribute("disabled");
+      //   },
+      //   updateProgress: function(progress) {
+      //     if (self.progressBar) {
+      //       if (progress) self.theme.updateProgressBar(self.progressBar, progress);
+      //       else self.theme.updateProgressBarUnknown(self.progressBar);
+      //     }
+      //   }
+      // });
+    // });
   },
   enable: function() {
     if(this.uploader) this.uploader.disabled = false;
