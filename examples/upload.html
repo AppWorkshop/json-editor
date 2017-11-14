@@ -31,14 +31,16 @@
 //    console.log(file); // the HTML5 file object
 //    console.log(cbs); // { failure(err){...}, success(url){...}, updateProgress(progress){....}
     var settings = {
-      ajaxBase: "http://mc.ju.to:4000",
+      ajax_base: "http://mc.ju.to:4000",
 //    acceptedExtensions: "jpg,jpeg,png,gif",
 //        access_key: "AKIAIEQOKEPZ4CBP43RA",
-      accessKey: "AKIAJPBLFYQ4PTPNJ2OA",
-      contentType: "application/octet-stream",
+      access_key: "AKIAJPBLFYQ4PTPNJ2OA",
+      content_type: "application/octet-stream",
       bucket: "pdffiles-develop.ju.to",
       region: "ap-southeast-2",
       key: uuidv4(),
+      bucket_is_cname: true,
+      result_url_protocol: "https",
 
       max_size: 50 * (1 << 30) // 50 gb
     };
@@ -53,40 +55,45 @@
       settings.file = file;
       settings.autostart = false;
 
-      settings.onError = function (err) {
+      settings.on_error = function (err) {
         console.log(`error_callback : ${err}`);
         cbs.failure(err);
       };
-      settings.onSelect = function (fileObj) {
+      settings.on_select = function (fileObj) {
 //        console.log(`onSelect : ${fileObj}`);
       };
-      settings.onStart = function (fileObj) {
+      settings.on_start = function (fileObj) {
 //        console.log(`onStart : ${fileObj}`);
       };
-      settings.onProgress = function (bytes_uploaded, bytes_total) {
+      settings.on_progress = function (bytes_uploaded, bytes_total) {
 //        console.log(`onProgress : ${bytes_uploaded}; ${bytes_total}`);
         let progress = (100 * bytes_uploaded) / bytes_total;
         cbs.updateProgress(progress.toFixed(2));
       };
-      settings.onInit = function () {
+      settings.on_init = function () {
 //        console.log(`onInit`);
       };
-      settings.onComplete = function () {
-        let url = `http://${settings.bucket}.s3.amazonaws.com/${settings.key}`;
-
+      settings.on_complete = function () {
+        let url;
+        let proto = settings.result_url_protocol || "http";
+        if (settings.bucket_is_cname) {
+          url = `${proto}://${settings.bucket}/${settings.key}`;
+        } else {
+          url = `${proto}://${settings.bucket}.s3.amazonaws.com/${settings.key}`;
+        }
         console.log(`onComplete: ${url}`);
         cbs.success(url);
       };
-      settings.onChunkProgress = function (param) {
+      settings.on_chunk_progress = function (param) {
 //        console.log(`onChunkProgress`);
       };
-      settings.onChunkUploaded = function () {
+      settings.on_chunk_uploaded = function () {
 //        console.log(`onChunkUploaded`);
       };
 
 
-      let upload = muleUploader(settings);
-      upload.uploadFile(file, false);
+      let upload = mule_upload(settings);
+      upload.upload_file(file, false);
     }
   };
 
