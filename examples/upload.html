@@ -9,6 +9,7 @@
     font-style: normal;
   }</style>
   <!--<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>-->
+  <script src="http://wzrd.in/standalone/uuid%2Fv4@latest"></script>
   <script src="../dist/jsoneditor.js"></script>
   <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -21,29 +22,30 @@
 <button id='submit'>Submit (console.log)</button>
 
 <script>
-  var settings = {
-    ajaxBase: "http://mc.ju.to:4000",
-//    acceptedExtensions: "jpg,jpeg,png,gif",
-//        access_key: "AKIAIEQOKEPZ4CBP43RA",
-    accessKey: "AKIAJPBLFYQ4PTPNJ2OA",
-    contentType: "application/octet-stream",
-    bucket: "pdffiles-develop.ju.to",
-    region: "ap-southeast-2",
-    key: "742516",
-
-    max_size: 50 * (1 << 30) // 50 gb
-  };
-
   // Specify theme
   JSONEditor.defaults.options.theme = 'bootstrap3';
 
   // Specify upload handler
   JSONEditor.defaults.options.upload = function (type, file, cbs) {
-    console.log(type); // seems to be "root.upload_default"
-    console.log(file); // the HTML5 file object
-    console.log(cbs); // { failure(err){...}, success(url){...}, updateProgress(progress){....}
+//    console.log(type); // seems to be "root.upload_default"
+//    console.log(file); // the HTML5 file object
+//    console.log(cbs); // { failure(err){...}, success(url){...}, updateProgress(progress){....}
+    var settings = {
+      ajaxBase: "http://mc.ju.to:4000",
+//    acceptedExtensions: "jpg,jpeg,png,gif",
+//        access_key: "AKIAIEQOKEPZ4CBP43RA",
+      accessKey: "AKIAJPBLFYQ4PTPNJ2OA",
+      contentType: "application/octet-stream",
+      bucket: "pdffiles-develop.ju.to",
+      region: "ap-southeast-2",
+      key: uuidv4(),
+
+      max_size: 50 * (1 << 30) // 50 gb
+    };
+
+
     if (type === 'root.upload_fail') {
-      console.log("fail... ")
+      console.log("fail... ");
       cbs.failure('Upload failed');
 
     }
@@ -105,14 +107,27 @@
               "href": "{{self}}"
             }
           ]
+        },
+        upload_default2: {
+          type: "string",
+          format: "url",
+          options: {
+            upload: true
+          },
+          "links": [
+            {
+              "href": "{{self}}"
+            }
+          ]
         }
+
       }
     }
   });
 
-  editor.setValue({
-    upload_default: "http://example.com/image.jpeg"
-  });
+//  editor.setValue({
+//    upload_default: "http://example.com/image.jpeg"
+//  });
 
   // Hook up the submit button to log to the console
   document.getElementById('submit').addEventListener('click', function () {
