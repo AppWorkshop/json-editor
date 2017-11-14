@@ -104,10 +104,12 @@
       title: "Image",
       properties: {
         upload_default: {
+          title: "Any File",
           type: "string",
           format: "url",
           options: {
-            upload: true
+            upload: true,
+            accept: "*"
           },
           "links": [
             {
@@ -116,6 +118,7 @@
           ]
         },
         upload_default2: {
+          title: "Image",
           type: "string",
           format: "url",
           options: {

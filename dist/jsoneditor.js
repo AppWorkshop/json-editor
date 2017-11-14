@@ -6641,7 +6641,11 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
 
       var fileInput = this.theme.getFormInputField('file');
       this.uploader = fileInput;
-      fileInput.setAttribute("accept", "image/*");
+      var accept = "image/*";
+      if (this.schema.options && this.schema.options.accept) {
+        accept = this.schema.options.accept;
+      }
+      fileInput.setAttribute("accept", accept);
       fileInput.setAttribute("class", "hidden");
       var uuid = $uuid();
       fileInput.setAttribute("id", uuid);
@@ -6669,23 +6673,21 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
         this.input.disabled = true;
       }
 
-      var eventName = 'change';
-      if ((typeof cordova !== "undefined") && (cordova.platformId === "android")) {
-        // the 'change' event doesn't seem to fire on android
-        eventName = 'click';
-      }
+      // var eventName = 'change';
+      // if ((typeof cordova !== "undefined") && (cordova.platformId === "android")) {
+      //   // the 'change' event doesn't seem to fire on android
+      //   eventName = 'click';
+      // }
 
-      this.uploader.addEventListener(eventName,function(e) {
+      this.uploader.addEventListener("change",function(e) {
         e.preventDefault();
         e.stopPropagation();
-        
-        if(this.files && this.files.length) {
-          var objectURL = window.URL.createObjectURL(this.files[0]);
 
+        function previewURLAndUploadFile(previewURL, fileObj) {
           // var fr = new FileReader();
           // fr.onload = function(evt) {
-          self.preview_value = e.target.result;
-          self.refreshPreview(objectURL);
+          // self.preview_value = e.target.result;
+          self.refreshPreview(previewURL);
           self.onChange(true);
           // fr = null;
 
@@ -6696,30 +6698,105 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
             self.preview.appendChild(self.progressBar);
           }
 
-          self.jsoneditor.options.upload(self.path, this.files[0], {
-            success: function(url) {
+          self.jsoneditor.options.upload(self.path, fileObj, {
+            success: function (url) {
               self.setValue(url);
 
-              if(self.parent) self.parent.onChildEditorChange(self);
+              if (self.parent) self.parent.onChildEditorChange(self);
               else self.jsoneditor.onChange();
 
               if (self.progressBar) self.preview.removeChild(self.progressBar);
             },
-            failure: function(error) {
+            failure: function (error) {
               self.theme.addInputError(self.uploader, error);
               if (self.progressBar) self.preview.removeChild(self.progressBar);
             },
-            updateProgress: function(progress) {
+            updateProgress: function (progress) {
               if (self.progressBar) {
                 if (progress) self.theme.updateProgressBar(self.progressBar, progress);
                 else self.theme.updateProgressBarUnknown(self.progressBar);
               }
             }
           });
+        }
+
+
+        // use cordova camera and notification plugins
+        function onImageNotChosenFail(message) {
+          navigator.notification.alert(
+            'Failed because: ' + message, // message
+            function () {
+            }, // callback that does nothing
+            'Failed', // title
+            'OK'                  // buttonName
+          );
+        }
+
+// process the confirmation dialog result
+        function obtainPicture(buttonIndex) {
+          var picOptions = {
+            quality: 75,
+            destinationType: Camera.DestinationType.FILE_URI,
+            correctOrientation: true,
+            encodingType: Camera.EncodingType.JPEG
+          };
+
+          if (buttonIndex === 1) {
+
+            picOptions.sourceType = Camera.PictureSourceType.CAMERA;
+            picOptions.allowEdit = true;
+
+
+          } else {
+            picOptions.sourceType = Camera.PictureSourceType.PHOTOLIBRARY;
+            picOptions.mediaType = Camera.MediaType.PICTURE;
+
+          }
+          // take a new photo
+          navigator.camera.getPicture(onImageChosenSuccess, onImageNotChosenFail, picOptions);
+        }
+
+
+        function onImageChosenSuccess(imageURI) {
+
+          window.resolveLocalFileSystemURL(imageURI, function success(fileEntry) {
+
+            // Do something with the FileEntry object, like write to it, upload it, etc.
+            // writeFile(fileEntry, imgUri);
+            console.log("got file: " + fileEntry.fullPath);
+            // displayFileData(fileEntry.nativeURL, "Native URL");
+            // use mule uploader with fileEntry.file
+            fileEntry.file(function (file) {
+
+              previewURLAndUploadFile(fileEntry.toInternalURL(), file);
+            }, function (error) {
+              console.error(error);
+            });
+
+          });
+
+
+        }
+
+        // if ((typeof cordova !== "undefined") && (cordova.platformId === "android")) {
+        //   // Show a custom confirmation dialog
+        //   //
+        //   navigator.notification.confirm(
+        //     'Where should the image come from?', // message
+        //     obtainPicture, // callback to invoke with index of button pressed
+        //     'Choose Image Source', // title
+        //     ['Take Photo', 'Choose Existing']         // buttonLabels
+        //   );
+        // } else if(this.files && this.files.length) {
+          var objectURL = window.URL.createObjectURL(this.files[0]);
+
+          previewURLAndUploadFile(objectURL, this.files[0]);
+
+
 
           // };
 
-        }
+        // }
       });
     }
 
@@ -6737,7 +6814,7 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
     // if(this.last_preview === this.preview_value) return;
     // this.last_preview = this.preview_value;
 
-    imgelem = this.container.querySelector("img");
+    var imgelem = this.container.querySelector("img");
     imgelem.src = objectURL;
     //TODO: Move this to theme and make it more flexible.
     imgelem.style.maxWidth = "25%";
