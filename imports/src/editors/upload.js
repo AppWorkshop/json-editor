@@ -54,13 +54,13 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
         this.input.disabled = true;
       }
 
-      // var eventName = 'change';
+      var eventName = 'change';
       // if ((typeof cordova !== "undefined") && (cordova.platformId === "android")) {
       //   // the 'change' event doesn't seem to fire on android
       //   eventName = 'click';
       // }
 
-      this.uploader.addEventListener("change",function(e) {
+      this.uploader.addEventListener(eventName,function(e) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -125,7 +125,7 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
           if (buttonIndex === 1) {
 
             picOptions.sourceType = Camera.PictureSourceType.CAMERA;
-            picOptions.allowEdit = true;
+            // picOptions.allowEdit = true;
 
 
           } else {
@@ -175,7 +175,7 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
 
 
 
-          // };
+          // }
 
         // }
       });
