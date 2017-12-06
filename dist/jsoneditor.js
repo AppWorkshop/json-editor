@@ -6813,75 +6813,14 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
   refreshPreview: function(objectURL) {
     // if(this.last_preview === this.preview_value) return;
     // this.last_preview = this.preview_value;
+    if (!this.options || !this.options.preventPreview) {
 
-    var imgelem = this.container.querySelector("img");
-    imgelem.src = objectURL;
-    //TODO: Move this to theme and make it more flexible.
-    imgelem.style.maxWidth = "25%";
-    imgelem.style.maxHeight = "25%";
-
-
-    // this.preview.innerHTML = '';
-    //
-    //
-    // var self = this;
-    //
-    // var file = this.uploader.files[0];
-    //
-    // var mime = file.type;
-    // this.preview.innerHTML = '<strong>Type:</strong> '+mime+', <strong>Size:</strong> '+file.size+' bytes';
-    // if((!mime) || mime.substr(0,5)==="image") {
-    //   this.preview.innerHTML += '<br>';
-    //   var img = document.createElement('img');
-    //   img.style.maxWidth = '100%';
-    //   img.style.maxHeight = '100px';
-    //   if (objectURL) {
-    //     img.src = objectURL;
-    //     img.onload = function() {
-    //       window.URL.revokeObjectURL(objectURL);
-    //     }
-    //
-    //   }
-    //   this.preview.appendChild(img);
-    // }
-    //
-    // this.preview.innerHTML += '<br>';
-    // var uploadButton = this.getButton('Upload', 'upload', 'Upload');
-    // this.preview.appendChild(uploadButton);
-    // uploadButton.addEventListener('click',function(event) {
-    //   event.preventDefault();
-    //
-    //   uploadButton.setAttribute("disabled", "disabled");
-      // self.theme.removeInputError(self.uploader);
-      //
-      // if (self.theme.getProgressBar) {
-      //   self.progressBar = self.theme.getProgressBar();
-      //   self.preview.appendChild(self.progressBar);
-      // }
-      //
-      // self.jsoneditor.options.upload(self.path, file, {
-      //   success: function(url) {
-      //     self.setValue(url);
-      //
-      //     if(self.parent) self.parent.onChildEditorChange(self);
-      //     else self.jsoneditor.onChange();
-      //
-      //     if (self.progressBar) self.preview.removeChild(self.progressBar);
-      //     uploadButton.removeAttribute("disabled");
-      //   },
-      //   failure: function(error) {
-      //     self.theme.addInputError(self.uploader, error);
-      //     if (self.progressBar) self.preview.removeChild(self.progressBar);
-      //     uploadButton.removeAttribute("disabled");
-      //   },
-      //   updateProgress: function(progress) {
-      //     if (self.progressBar) {
-      //       if (progress) self.theme.updateProgressBar(self.progressBar, progress);
-      //       else self.theme.updateProgressBarUnknown(self.progressBar);
-      //     }
-      //   }
-      // });
-    // });
+      var imgelem = this.container.querySelector("img");
+      imgelem.src = objectURL;
+      //TODO: Move this to theme and make it more flexible.
+      imgelem.style.maxWidth = "25%";
+      imgelem.style.maxHeight = "25%";
+    }
   },
   enable: function() {
     if(this.uploader) this.uploader.disabled = false;
