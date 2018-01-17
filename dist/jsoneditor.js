@@ -6705,6 +6705,9 @@ JSONEditor.defaults.editors.upload = JSONEditor.AbstractEditor.extend({
           self.jsoneditor.options.upload(self.path, fileObj, {
             success: function (url) {
               self.setValue(url);
+              if (self.jsoneditor.options.uploadSuccessCallback) {
+                self.jsoneditor.options.uploadSuccessCallback(self.path, fileObj, url);
+              }
 
               if (self.parent) self.parent.onChildEditorChange(self);
               else self.jsoneditor.onChange();
