@@ -86,6 +86,7 @@ module.exports = function(grunt) {
         nonew: true,
         immed: true,
         latedef: true,
+        reporterOutput: "",
         "globals": {
           "Meteor": true,
           "MobileRangeSlider": true
