@@ -409,6 +409,10 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
       var linkTextNode = document.createTextNode(this.schema.linkTextIfUndefined);
       this.input.appendChild(linkTextNode);
     }
+    if (this.schema.placeholder) {
+      this.input.setAttribute('placeholder',this.schema.placeholder);
+
+    }
 
     this.control = this.theme.getFormControl(this.label, this.input, this.description, this.schema.info);
 
