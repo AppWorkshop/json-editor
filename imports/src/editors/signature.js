@@ -226,14 +226,14 @@ JSONEditor.defaults.editors.signature = JSONEditor.AbstractEditor.extend({
       return;
 
     var changed = this.getValue() !== val;
-    this.value = val;
-
-    if (val.length > 0) {
+    if (val.length > 0 && changed && this.getValue() === "") {
       // parse the value and load it into the canvas
       var valparsed = JSON.parse(val);
       this.signaturePad.fromDataURL(valparsed.dataURI);
       window.dispatchEvent(new Event('resize')); // trigger resize handler
     }
+    this.value = val;
+
     // Bubble this setValue to parents if the value changed
     this.onChange(changed);
 
