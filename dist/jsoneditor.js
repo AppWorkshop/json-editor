@@ -7083,6 +7083,12 @@ JSONEditor.defaults.editors.signature = JSONEditor.AbstractEditor.extend({
 
     var changed = this.getValue() !== val;
     this.value = val;
+
+    // parse the value and load it into the canvas
+    var valparsed = JSON.parse(val);
+    this.signaturePad.fromDataURL(valparsed.dataURI);
+    window.dispatchEvent(new Event('resize')); // trigger resize handler
+
     // Bubble this setValue to parents if the value changed
     this.onChange(changed);
 
