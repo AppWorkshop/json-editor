@@ -76,8 +76,10 @@ JSONEditor.defaults.editors.signature = JSONEditor.AbstractEditor.extend({
 
     function resizeCanvas() {
       var parent = $(canvas).parent();
-      // resize to fill the parent, apart from the "clear signature" button at the bottom.
-      resize(parent.width(), (parent.height() - parent.children('.btn-group').height()));
+      if ( parent.width() > 0 && parent.height() > 0 ) {
+        // resize to fill the parent, apart from the "clear signature" button at the bottom.
+        resize(parent.width(), (parent.height() - parent.children('.btn-group').height()));
+      }
     }
     function resize(w, h){
 
