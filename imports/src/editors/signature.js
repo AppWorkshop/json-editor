@@ -227,18 +227,65 @@ JSONEditor.defaults.editors.signature = JSONEditor.AbstractEditor.extend({
     if (val === this.serialized)
       return;
 
-    var changed = this.getValue() !== val;
-    if (val.length > 0 && changed && this.getValue() === "") {
-      // parse the value and load it into the canvas
-      var valparsed = JSON.parse(val);
-      this.signaturePad.fromDataURL(valparsed.dataURI);
-      window.dispatchEvent(new Event('resize')); // trigger resize handler
+    if ( this.jsoneditor.options.disable_output_form ) {
+      // If the form is set as disabled, replace the signature canvas element with an image
+      // Check that we have data as string
+      if (typeof val === "string" && val.length > 0) {
+        val = JSON.parse(val);
+
+        // Each canvas container has a unique ID which we can use to create a css selector
+        var self = this;
+        var containerSelector = '.container-' + self.key + ' .signature';
+
+        // After parsing the value, make sure it is an object with what we expect
+        if (typeof val === "object" && val.hasValue) {
+          // get rid of the created canvas holding our signature object
+          $(containerSelector).remove();
+
+          // Create the image container with the appropriate theme markup
+          var divElem = this.theme.getContainer();
+          $(divElem).addClass("signature");
+
+          // Create the image element and add the source, height and width
+          var sigImage = document.createElement("img");
+          sigImage.src = val.dataURI;
+          sigImage.height = val.height;
+          sigImage.width = val.width;
+
+          // Create the span element that holds the timestamp and assign that as inner text
+          var sigTimestamp = document.createElement("span");
+          $(sigTimestamp).addClass("signature-timestamp");
+          sigTimestamp.textContent = val.timestamp;
+
+          // Append the image and timestamp to the container element
+          divElem.appendChild(sigImage);
+          divElem.appendChild(sigTimestamp);
+          // Append the image to the main container instead of the canvas
+          self.container.append(divElem);
+        }
+      }
+    } else {
+      // Normal behavior - Used when filling in or editing a signature
+
+      // Is the value parsed (val) different from the current value (this.getValue)?
+      var changed = this.getValue() !== val;
+
+      if (changed && this.getValue() === "") {
+        this.signaturePad.clear();
+        window.dispatchEvent(new Event('resize')); // trigger resize handler
+      }
+
+      if (typeof val === "string" && val.length > 0) {
+        this.signaturePad.clear(); // Looks like fromDataURL does not clean up existing values
+        var valParsed = JSON.parse(val);
+        this.signaturePad.fromDataURL(valParsed.dataURI, {ratio: 1}); // Ratio!
+      }
+      this.value = val;
+      console.log(this);
+
+      // Bubble this setValue to parents if the value changed
+      this.onChange(changed);
     }
-    this.value = val;
-
-    // Bubble this setValue to parents if the value changed
-    this.onChange(changed);
-
   },
   showValidationErrors: function (errors) {
     var self = this;
