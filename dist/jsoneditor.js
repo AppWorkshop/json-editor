@@ -7091,13 +7091,19 @@ JSONEditor.defaults.editors.signature = JSONEditor.AbstractEditor.extend({
 
         // Each canvas container has a unique ID which we can use to create a css selector
         var self = this;
-        var containerSelector = '.container-' + self.key + ' .signature';
+        var containerSelector = '.container-' + self.key;
+        var containerSelectorSignature = containerSelector + ' .signature';
 
         // After parsing the value, make sure it is an object with what we expect
         if (typeof val === "object" && val.hasValue) {
-          // get rid of the created canvas holding our signature object
-          $(containerSelector).remove();
-
+          // Check if we have a list element that is being repeated
+          if (containerSelector.length > 1) {
+            // We only want to replace the last element in it
+            $(containerSelector).last().find('.signature').remove();
+          } else {
+            // get rid of the created canvas holding our signature object
+            $(containerSelectorSignature).remove();
+          }
           // Create the image container with the appropriate theme markup
           var divElem = this.theme.getContainer();
           $(divElem).addClass("signature");
@@ -7137,7 +7143,6 @@ JSONEditor.defaults.editors.signature = JSONEditor.AbstractEditor.extend({
         this.signaturePad.fromDataURL(valParsed.dataURI, {ratio: 1}); // Ratio!
       }
       this.value = val;
-      console.log(this);
 
       // Bubble this setValue to parents if the value changed
       this.onChange(changed);
