@@ -240,7 +240,6 @@ JSONEditor.defaults.editors.signature = JSONEditor.AbstractEditor.extend({
 
         // After parsing the value, make sure it is an object with what we expect
         if (typeof val === "object" && val.hasValue) {
-          console.log($(containerSelector).length);
           // Check if we have a list element that is being repeated
           if (containerSelector.length > 1) {
             // We only want to replace the last element in it
@@ -288,7 +287,6 @@ JSONEditor.defaults.editors.signature = JSONEditor.AbstractEditor.extend({
         this.signaturePad.fromDataURL(valParsed.dataURI, {ratio: 1}); // Ratio!
       }
       this.value = val;
-      console.log(this);
 
       // Bubble this setValue to parents if the value changed
       this.onChange(changed);
