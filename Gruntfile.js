@@ -5,6 +5,9 @@ module.exports = function(grunt) {
     concat: {
       dist: {
         src: [
+          // mfranzke datalist-polyfill
+          'imports/lib/datalist-polyfill.min.js',
+
           // License & version info, start the containing closure
           'imports/src/intro.js',
           

@@ -359,16 +359,31 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     if (this.schema.autocomplete) {
       if (typeof $ !== "undefined") { // if we have jquery
         // attach autocomplete data, if it exists and JqueryUI is available
-        if (this.schema.autocompleteData && !!$(this.input).autocomplete) {
-          $(this.input).autocomplete(
-                  {
-                    "source": this.schema.autocompleteData,
-                    select: function(event, ui) {
-                      self.setValue(ui.item.value);
-                      self.jsoneditor.onChange();
-                    }
-                  }
-          );
+        if (!!$(this.input).autocomplete) {
+          var acSource = this.schema.autocompleteData; // default to autocompleteData i.e. array
+          if (!acSource) {
+            // no autocompleteData. Maybe we have a function and a autocompleteDataSourceID we can use?
+            if (self.jsoneditor.options.autocompleteHandler) {
+              // use a wrapper around the designated autocomplete handler, that adds our data source ID as a parameter.
+              acSource = function(request, response) {
+                if (self.schema.autocompleteDataSourceID) {
+                  request.dataSourceID = self.schema.autocompleteDataSourceID;
+                }
+                self.jsoneditor.options.autocompleteHandler(request, response);
+              }
+            }
+          }
+          if (acSource) {
+            $(this.input).autocomplete(
+              {
+                "source": acSource,
+                select: function (event, ui) {
+                  self.setValue(ui.item.value);
+                  self.jsoneditor.onChange();
+                }
+              }
+            );
+          }
         }
       }
     }
