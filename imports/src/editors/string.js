@@ -333,7 +333,25 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
         this.input = this.theme.getFormInputField(this.input_type);
         this.container.setAttribute('class',this.container.getAttribute('class')+' hidden');
       }
-      // HTML5 Input type
+      // autocomplete
+      else if (this.format === "autocomplete" && !!$().autocomplete) {
+        var divElem = document.createElement('div');
+        divElem.setAttribute("class", "autocomplete");
+
+        var hiddenInput = this.theme.getFormInputField('hidden');
+        var uuid = $uuid();
+        hiddenInput.setAttribute("id", uuid);
+
+        this.input_display = this.theme.getFormInputField('text');
+
+        divElem.appendChild(hiddenInput);
+        divElem.appendChild(this.input_display);
+
+        this.input = divElem;
+        this.input_type = 'hidden';
+
+      }
+      // HTML5 Input type - not geolocation
       else if (this.format !== "geolocation") {
         this.input_type = this.format;
         this.input = this.theme.getFormInputField(this.input_type);
@@ -359,7 +377,7 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     if (this.schema.autocomplete) {
       if (typeof $ !== "undefined") { // if we have jquery
         // attach autocomplete data, if it exists and JqueryUI is available
-        if (!!$(this.input).autocomplete) {
+        if (!!$(this.input).autocomplete && this.input_display) {
           var acSource = this.schema.autocompleteData; // default to autocompleteData i.e. array
           if (!acSource) {
             // no autocompleteData. Maybe we have a function and a autocompleteDataSourceID we can use?
@@ -374,12 +392,14 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
             }
           }
           if (acSource) {
-            $(this.input).autocomplete(
+            $(this.input_display).autocomplete(
               {
                 "source": acSource,
                 select: function (event, ui) {
                   self.setValue(ui.item.value);
+                  $(self.input_display).val(ui.item.label);
                   self.jsoneditor.onChange();
+                  return false;
                 }
               }
             );
