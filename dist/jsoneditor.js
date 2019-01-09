@@ -2133,6 +2133,8 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     this.input.removeAttribute('name');
   },
   setValue: function(value,initial,from_template) {
+    console.log("setValue(" + value + "," + initial + "," + from_template + ")");
+    console.log("this.schema = " + JSON.stringify(this.schema,null,2));
     var self = this;
     
     if(this.template && !from_template) {
@@ -2166,6 +2168,13 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     }
 
     var sanitized = this.sanitize(value);
+
+    if (this.schema.autocomplete) {
+      if (value) {
+        this.input_display.value = sanitized;
+        this.input_hidden.value = sanitized;
+      }
+    }
 
     if(this.input.value === sanitized) {
       return;
@@ -2458,19 +2467,19 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
       }
       // autocomplete
       else if (this.format === "autocomplete" && !!$().autocomplete) {
-        var divElem = document.createElement('div');
-        divElem.setAttribute("class", "autocomplete");
+        var acDivElem = document.createElement('div');
+        acDivElem.setAttribute("class", "autocomplete");
 
-        var hiddenInput = this.theme.getFormInputField('hidden');
-        var uuid = $uuid();
-        hiddenInput.setAttribute("id", uuid);
+        this.input_hidden = this.theme.getFormInputField('hidden');
+        var acUUID = $uuid();
+        this.input_hidden.setAttribute("id", acUUID);
 
         this.input_display = this.theme.getFormInputField('text');
 
-        divElem.appendChild(hiddenInput);
-        divElem.appendChild(this.input_display);
+        acDivElem.appendChild(this.input_hidden);
+        acDivElem.appendChild(this.input_display);
 
-        this.input = divElem;
+        this.input = acDivElem;
         this.input_type = 'hidden';
 
       }
@@ -2511,7 +2520,7 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
                   request.dataSourceID = self.schema.autocompleteDataSourceID;
                 }
                 self.jsoneditor.options.autocompleteHandler(request, response);
-              }
+              };
             }
           }
           if (acSource) {
@@ -2519,7 +2528,9 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
               {
                 "source": acSource,
                 select: function (event, ui) {
-                  self.setValue(ui.item.value);
+                  //TODO: use item.value instead of label.
+                  // self.setValue(ui.item.value);
+                  self.setValue(ui.item.label);
                   $(self.input_display).val(ui.item.label);
                   self.jsoneditor.onChange();
                   return false;
