@@ -2133,8 +2133,8 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     this.input.removeAttribute('name');
   },
   setValue: function(value,initial,from_template) {
-    console.log("setValue(" + value + "," + initial + "," + from_template + ")");
-    console.log("this.schema = " + JSON.stringify(this.schema,null,2));
+    // console.log("setValue(" + value + "," + initial + "," + from_template + ")");
+    // console.log("this.schema = " + JSON.stringify(this.schema,null,2));
     var self = this;
     
     if(this.template && !from_template) {
