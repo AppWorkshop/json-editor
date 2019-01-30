@@ -411,9 +411,28 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
                   $(self.input_display).val(ui.item.label);
                   self.jsoneditor.onChange();
                   return false;
-                }
+                },
+                change: function( event, ui ) {
+                  self.setValue(this.value);
+                },
+                delay: 500,
+                minLength: 0,
+                // focus: function( event, ui ) { // ui = {item: {label: "00000001 - Toyota - 1AAA111", value: "YTTYitnfoedz7Gaq4"}}
+                //   console.log("focus:",event,ui);
+                // }
+                // search: function( event, ui) {
+                //     console.log("search:",event,ui);
+                //
+                // },
+                // create: function( event, ui) {
+                //   console.log("create:",event,ui);
+                //
+                // }
+
               }
-            );
+            ).focus(function () {
+              $(this).autocomplete("search");
+            });
           }
         }
       }

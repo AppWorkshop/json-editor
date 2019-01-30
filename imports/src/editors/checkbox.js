@@ -56,7 +56,8 @@ JSONEditor.defaults.editors.checkbox = JSONEditor.AbstractEditor.extend({
   },
   build: function() {
     var self = this;
-    if (!this.getOption('compact', false))
+    // if (!this.getOption('compact', false))
+    if (!this.options.compact)
       this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
     if (this.schema.description)
       this.description = this.theme.getFormInputDescription(this.schema.description);
@@ -66,7 +67,7 @@ JSONEditor.defaults.editors.checkbox = JSONEditor.AbstractEditor.extend({
 
     self.enum_values = [true, false];
 
-    if (this.getOption('compact'))
+    if (this.options.compact)
       this.container.setAttribute('class', this.container.getAttribute('class') + ' compact');
     if (this.schema.format === "checkbox" && this.schema.type === "boolean") {
       this.input = this.theme.getCheckbox(this.path, this.schema.default);

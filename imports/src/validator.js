@@ -64,6 +64,7 @@ JSONEditor.Validator = Class.extend({
     var errors = [];
     var valid, i, j, thisEditor;
     var stringified = JSON.stringify(value);
+    var self = this;
 
     path = path || 'root';
 
@@ -595,6 +596,36 @@ JSONEditor.Validator = Class.extend({
               property: 'pattern',
               message: this.translate('error_pattern')
             });
+          }
+        }
+
+        // `autocomplete`
+        if (schema.autocomplete) {
+          var acSource = schema.autocompleteData; // default to autocompleteData i.e. array
+          if (acSource) { // check array
+
+          } else { // if (!acSource) {
+            // Maybe we have a autocompleteDataSourceID and validator callback we can use?
+            if (schema.autocompleteDataSourceID && this.jsoneditor.options.autocompleteValidator) {
+                // use a wrapper around the designated autocomplete handler, that adds our data source ID as a parameter.
+                self.jsoneditor.options.autocompleteValidator(
+                  {
+                    dataSourceID: schema.autocompleteDataSourceID,
+                    term: value
+                  },
+                  function(isACValueValid) { // callback
+                    if (!isACValueValid) {
+                      errors.push({
+                        path: path,
+                        property: 'oneOf',
+                        message: self.translate('error_enum')
+                      });
+                    }
+                    thisEditor.showValidationErrors(errors);
+                  },
+                  thisEditor
+                );
+            } // otherwise we can't really validate
           }
         }
       }

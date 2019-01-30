@@ -55,7 +55,7 @@ JSONEditor.defaults.editors.signature = JSONEditor.AbstractEditor.extend({
     }
 
 
-    if (this.getOption('compact'))
+    if (this.options.compact)
       this.container.setAttribute('class', this.container.getAttribute('class') + ' compact');
 
     if (this.schema.readOnly || this.schema.readonly || this.schema.template) {

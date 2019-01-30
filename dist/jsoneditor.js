@@ -845,6 +845,7 @@ JSONEditor.Validator = Class.extend({
     var errors = [];
     var valid, i, j, thisEditor;
     var stringified = JSON.stringify(value);
+    var self = this;
 
     path = path || 'root';
 
@@ -1376,6 +1377,36 @@ JSONEditor.Validator = Class.extend({
               property: 'pattern',
               message: this.translate('error_pattern')
             });
+          }
+        }
+
+        // `autocomplete`
+        if (schema.autocomplete) {
+          var acSource = schema.autocompleteData; // default to autocompleteData i.e. array
+          if (acSource) { // check array
+
+          } else { // if (!acSource) {
+            // Maybe we have a autocompleteDataSourceID and validator callback we can use?
+            if (schema.autocompleteDataSourceID && this.jsoneditor.options.autocompleteValidator) {
+                // use a wrapper around the designated autocomplete handler, that adds our data source ID as a parameter.
+                self.jsoneditor.options.autocompleteValidator(
+                  {
+                    dataSourceID: schema.autocompleteDataSourceID,
+                    term: value
+                  },
+                  function(isACValueValid) { // callback
+                    if (!isACValueValid) {
+                      errors.push({
+                        path: path,
+                        property: 'oneOf',
+                        message: self.translate('error_enum')
+                      });
+                    }
+                    thisEditor.showValidationErrors(errors);
+                  },
+                  thisEditor
+                );
+            } // otherwise we can't really validate
           }
         }
       }
@@ -2534,9 +2565,28 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
                   $(self.input_display).val(ui.item.label);
                   self.jsoneditor.onChange();
                   return false;
-                }
+                },
+                change: function( event, ui ) {
+                  self.setValue(this.value);
+                },
+                delay: 500,
+                minLength: 0,
+                // focus: function( event, ui ) { // ui = {item: {label: "00000001 - Toyota - 1AAA111", value: "YTTYitnfoedz7Gaq4"}}
+                //   console.log("focus:",event,ui);
+                // }
+                // search: function( event, ui) {
+                //     console.log("search:",event,ui);
+                //
+                // },
+                // create: function( event, ui) {
+                //   console.log("create:",event,ui);
+                //
+                // }
+
               }
-            );
+            ).focus(function () {
+              $(this).autocomplete("search");
+            });
           }
         }
       }
@@ -5745,7 +5795,8 @@ JSONEditor.defaults.editors.checkbox = JSONEditor.AbstractEditor.extend({
   },
   build: function() {
     var self = this;
-    if (!this.getOption('compact', false))
+    // if (!this.getOption('compact', false))
+    if (!this.options.compact)
       this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
     if (this.schema.description)
       this.description = this.theme.getFormInputDescription(this.schema.description);
@@ -5755,7 +5806,7 @@ JSONEditor.defaults.editors.checkbox = JSONEditor.AbstractEditor.extend({
 
     self.enum_values = [true, false];
 
-    if (this.getOption('compact'))
+    if (this.options.compact)
       this.container.setAttribute('class', this.container.getAttribute('class') + ' compact');
     if (this.schema.format === "checkbox" && this.schema.type === "boolean") {
       this.input = this.theme.getCheckbox(this.path, this.schema.default);
@@ -6957,7 +7008,7 @@ JSONEditor.defaults.editors.signature = JSONEditor.AbstractEditor.extend({
     }
 
 
-    if (this.getOption('compact'))
+    if (this.options.compact)
       this.container.setAttribute('class', this.container.getAttribute('class') + ' compact');
 
     if (this.schema.readOnly || this.schema.readonly || this.schema.template) {
