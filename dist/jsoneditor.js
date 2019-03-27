@@ -9117,7 +9117,7 @@ JSONEditor.defaults.languages.en = {
   /**
    * When a value is not one of the enumerated values
    */
-  error_enum: "One of the enumerated values",
+  error_enum: "Choose a value",
   /**
    * When a value doesn't validate any schema of a 'anyOf' combination
    */
