@@ -10,20 +10,20 @@ module.exports = function(grunt) {
 
           // License & version info, start the containing closure
           'imports/src/intro.js',
-          
+
           // Simple inheritance
           'imports/src/class.js',
           // IE9 polyfills
           'imports/src/ie9.js',
           // Utils like extend, each, and trigger
           'imports/src/utilities.js',
-          
+
           // The main JSONEditor class
           'imports/src/core.js',
 
           // JSON Schema validator
           'imports/src/validator.js',
-          
+
           // All the editors
           'imports/src/editor.js',
           'imports/src/editors/null.js',
@@ -37,9 +37,9 @@ module.exports = function(grunt) {
           'imports/src/editors/table.js',
           'imports/src/editors/multiple.js',
           'imports/src/editors/enum.js',
-          'imports/src/editors/checkbox.js', 
+          'imports/src/editors/checkbox.js',
           'imports/src/editors/select.js',
-          'imports/src/editors/radio.js', 
+          'imports/src/editors/radio.js',
           'imports/src/editors/multiselect.js',
           'imports/src/editors/base64.js',
           'imports/src/editors/upload.js',
@@ -56,10 +56,10 @@ module.exports = function(grunt) {
 
           // Set the defaults
           'imports/src/defaults.js',
-          
+
           // Wrapper for $.fn style initialization
           'imports/src/jquery.js',
-          
+
           // End the closure
           'imports/src/outro.js'
         ],
@@ -88,7 +88,7 @@ module.exports = function(grunt) {
         nonbsp: true,
         nonew: true,
         immed: true,
-        latedef: true,
+        latedef: false,
         reporterOutput: "",
         "globals": {
           "Meteor": true,
@@ -98,20 +98,20 @@ module.exports = function(grunt) {
       beforeconcat: [
         'imports/src/class.js',
         'imports/src/ie9.js',
-        
+
         // Utils like extend, each, and trigger
         'imports/src/utilities.js',
-        
+
         // The main JSONEditor class
         'imports/src/core.js',
 
         // JSON Schema validator
         'imports/src/validator.js',
-        
+
         // All the editors
         'imports/src/editor.js',
         'imports/src/editors/*.js',
-        
+
         // All the themes and iconlibs
         'imports/src/theme.js',
         'imports/src/themes/*.js',
@@ -123,7 +123,7 @@ module.exports = function(grunt) {
 
         // Set the defaults
         'imports/src/defaults.js',
-        
+
         // Wrapper for $.fn style initialization
         'imports/src/jquery.js'
       ],
