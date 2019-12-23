@@ -490,19 +490,21 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     if (this.secondaryControl) this.container.appendChild(this.secondaryControl);
 
 
-/*
     // materialize date picker
-    if (this.format === 'date' && this.jsoneditor.options.theme === 'materialize' && !$isCordova()) {
-      $(this.input).pickadate({format: 'dd/mm/yyyy'});
-      this.input = $(this.control).find('input').get(0);
-      $(this.input).change(function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        self.refreshValue();
-        self.onChange(true);
-      });
+    if (this.format === 'date') {
+      if (window.flatpickr) {
+        flatpickr($(this.input), {});
+      }
+      // $(this.input).pickadate({format: 'dd/mm/yyyy'});
+      // this.input = $(this.control).find('input').get(0);
+      // $(this.input).change(function(e) {
+      //   e.preventDefault();
+      //   e.stopPropagation();
+      //   self.refreshValue();
+      //   self.onChange(true);
+      // });
     }
-*/
+
 
     // Any special formatting that needs to happen after the input is added to the dom
     window.requestAnimationFrame(function() {
