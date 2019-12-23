@@ -2647,7 +2647,7 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     // materialize date picker
     if (this.format === 'date') {
       if (window.flatpickr) {
-        
+        flatpickr($(this.input), {});
       }
       // $(this.input).pickadate({format: 'dd/mm/yyyy'});
       // this.input = $(this.control).find('input').get(0);
