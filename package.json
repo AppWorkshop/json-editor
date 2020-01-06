@@ -26,6 +26,9 @@
   "engines": {
     "node": ">= 0.8.0"
   },
+  "peerDependencies": {
+    "flatpickr": "^4.6.3"
+  },
   "devDependencies": {
     "grunt": "^1.0.4",
     "grunt-contrib-concat": "^0.3.0",
