@@ -3,12 +3,13 @@ JSONEditor.defaults.templates.ejs = function() {
 
   return {
     compile: function(template) {
-      var compiled = new window.EJS({
-        text: template
-      });
+      var compiled = window.EJS.compile(template);
 
       return function(context) {
-        return compiled.render(context);
+        context.__now = new Date();
+        context._ = window._;
+        context.moment = window.moment;
+        return compiled(context);
       };
     }
   };

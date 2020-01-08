@@ -2,7 +2,7 @@
   "name": "json-editor",
   "title": "JSONEditor",
   "description": "JSON Schema based editor",
-  "version": "0.7.13",
+  "version": "0.7.14",
   "main": "dist/jsoneditor.js",
   "author": {
     "name": "Jeremy Dorn",
@@ -27,18 +27,31 @@
     "node": ">= 0.8.0"
   },
   "peerDependencies": {
-    "flatpickr": "^4.6.3"
+    "ejs": "^3.0.1",
+    "flatpickr": "^4.6.3",
+    "jexl": "^2.2.2",
+    "lodash": "^4.17.15",
+    "moment": "^2.24.0"
   },
   "devDependencies": {
+    "ejs": "^3.0.1",
+    "flatpickr": "^4.6.3",
     "grunt": "^1.0.4",
     "grunt-contrib-concat": "^0.3.0",
     "grunt-contrib-jshint": "^2.1.0",
     "grunt-contrib-uglify": "^4.0.1",
-    "grunt-contrib-watch": "^1.1.0"
+    "grunt-contrib-watch": "^1.1.0",
+    "jexl": "^2.2.2",
+    "lodash": "^4.17.15",
+    "moment": "^2.24.0",
+    "parcel-bundler": "^1.12.4"
   },
   "scripts": {
     "build": "npm install && grunt",
     "start": "grunt watch",
-    "test": "grunt"
+    "test": "grunt",
+    "examples": "npx serve",
+    "jexl-example": "./node_modules/parcel-bundler/bin/cli.js examples/jexl.html",
+    "ejs-example": "./node_modules/parcel-bundler/bin/cli.js examples/ejs.html"
   }
 }

@@ -2216,6 +2216,18 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
 
     this.input.value = sanitized;
 
+    // If using flatpickr, update the UI
+
+    if (this.schema.format &&
+      (this.schema.format === "date" ||
+        this.schema.format === "time" ||
+        this.schema.format === "datetime")) {
+
+      if (this.input._flatpickr) {
+        this.input._flatpickr.setDate(sanitized);
+      }
+    }
+
     // If using SCEditor, update the WYSIWYG
     if (this.sceditor_instance) {
       this.sceditor_instance.val(sanitized);
@@ -2663,7 +2675,7 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
       if (this.format === "time" || this.format === "date" || this.format === "datetime") {
         // set flatpickr defaults if none are supplied
         var flatpickrDefaults;
-        switch (this.format === "date") {
+        switch (this.format) {
           case "date":
             flatpickrDefaults = {
               "dateFormat": "Y-m-d",
@@ -2687,8 +2699,11 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
               "noCalendar": false
             };
         }
-        var flatpickrOptions = this.schema.options.flatpickr || flatpickrDefaults;
-        flatpickr($(this.input), flatpickrOptions);
+        var flatpickrOptions = flatpickrDefaults;
+        if (this.schema.options && this.schema.options.flatpickr) {
+          flatpickrOptions = this.schema.options.flatpickr;
+        }
+        flatpickr(this.input, flatpickrOptions);
       }
     }
 
@@ -9051,12 +9066,13 @@ JSONEditor.defaults.templates.ejs = function() {
 
   return {
     compile: function(template) {
-      var compiled = new window.EJS({
-        text: template
-      });
+      var compiled = window.EJS.compile(template);
 
       return function(context) {
-        return compiled.render(context);
+        context.__now = new Date();
+        context._ = window._;
+        context.moment = window.moment;
+        return compiled(context);
       };
     }
   };
@@ -9074,6 +9090,51 @@ JSONEditor.defaults.templates.hogan = function() {
       var compiled = window.Hogan.compile(template);
       return function(context) {
         return compiled.render(context);
+      };
+    }
+  };
+};
+
+JSONEditor.defaults.templates.jexl = function() {
+  if(!window.jexl) return false;
+  window.jexl.addTransform("_", function (inputObj, lodashFuncName) { // , ...args as 3rd param
+    if (window._) {
+      if (_.hasOwnProperty(lodashFuncName)) {
+        var args = Array.prototype.slice.call(arguments,2);
+        return _[lodashFuncName].apply(this, [inputObj].concat(args));
+      }
+    } else {
+      throw new Error("json-editor jexl template: Lodash not found");
+    }
+  });
+
+  window.jexl.addTransform("moment", function (inputObj, momentFnName) { // , ...args as 3rd param
+    if (window.moment) {
+      var momentInst = window.moment(inputObj);
+      if (momentInst.isValid() &&
+        momentInst[momentFnName] &&
+        typeof momentInst[momentFnName] === "function") {
+
+        var args = Array.prototype.slice.call(arguments,2);
+        return momentInst[momentFnName].apply(momentInst, args);
+      }
+    } else {
+      throw new Error("json-editor jexl template: moment not found");
+    }
+  });
+
+  return {
+    compile: function(template) {
+      // console.log(`called jexl compile(${JSON.stringify(template)})`);
+      var compiled = window.jexl.compile(template);
+
+      return function(context) {
+        // add '__now' to the context
+        // console.log(`called jexl evalSync(${template}, ${JSON.stringify(context)})`);
+        var newContext = Object.assign({
+          __now: new Date()
+        }, context);
+        return compiled.evalSync(newContext);
       };
     }
   };

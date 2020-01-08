@@ -62,6 +62,18 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
 
     this.input.value = sanitized;
 
+    // If using flatpickr, update the UI
+
+    if (this.schema.format &&
+      (this.schema.format === "date" ||
+        this.schema.format === "time" ||
+        this.schema.format === "datetime")) {
+
+      if (this.input._flatpickr) {
+        this.input._flatpickr.setDate(sanitized);
+      }
+    }
+
     // If using SCEditor, update the WYSIWYG
     if (this.sceditor_instance) {
       this.sceditor_instance.val(sanitized);
@@ -509,7 +521,7 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
       if (this.format === "time" || this.format === "date" || this.format === "datetime") {
         // set flatpickr defaults if none are supplied
         var flatpickrDefaults;
-        switch (this.format === "date") {
+        switch (this.format) {
           case "date":
             flatpickrDefaults = {
               "dateFormat": "Y-m-d",
@@ -533,8 +545,11 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
               "noCalendar": false
             };
         }
-        var flatpickrOptions = this.schema.options.flatpickr || flatpickrDefaults;
-        flatpickr($(this.input), flatpickrOptions);
+        var flatpickrOptions = flatpickrDefaults;
+        if (this.schema.options && this.schema.options.flatpickr) {
+          flatpickrOptions = this.schema.options.flatpickr;
+        }
+        flatpickr(this.input, flatpickrOptions);
       }
     }
 
