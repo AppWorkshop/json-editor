@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
         "Date-b3tdGzfashfHoRNfv": {
           "_id": "b3tdGzfashfHoRNfv",
           "type": "string",
-          "title": "Date",
+          "title": "Entry Date",
           "format": "date",
           "required": true,
           "propertyOrder": 73,
@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
         "Time-q96RbJREypkwDoxp3": {
           "_id": "q96RbJREypkwDoxp3",
           "type": "string",
-          "title": "Time",
+          "title": "Start Time",
           "format": "time",
           "options": {
             "flatpickr": {
@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
         "Time-DjYudWTxQqnu7KjkY": {
           "_id": "DjYudWTxQqnu7KjkY",
           "type": "string",
-          "title": "Time",
+          "title": "End Time",
           "format": "time",
           "options": {
             "flatpickr": {
@@ -132,7 +132,8 @@ document.addEventListener("DOMContentLoaded", (event) => {
         "Checkbox-g6HFGjYDqnbtC6eT5": {
           "_id": "g6HFGjYDqnbtC6eT5",
           "type": "boolean",
-          "title": "Checkbox",
+          "title": "Lunch Break",
+          "description": "30-minute lunch break",
           "format": "checkbox",
           "required": true,
           "propertyOrder": 76
@@ -140,34 +141,27 @@ document.addEventListener("DOMContentLoaded", (event) => {
         "Text-NxWuTz4Bg6i4zrC3L": {
           "_id": "NxWuTz4Bg6i4zrC3L",
           "type": "string",
-          "title": "Text",
+          "title": "Total Hours",
           "template": `
-<%
+<%_
 // EJS goes here
-const EntryDateVal = locals["Date-b3tdGzfashfHoRNfv"]
-const EndTimeVal = locals["Time-DjYudWTxQqnu7KjkY"];
-const StartTimeVal = locals["Time-q96RbJREypkwDoxp3"];
-const LunchBreakVal = locals["Checkbox-g6HFGjYDqnbtC6eT5"]
-
-if (EndTimeVal && StartTimeVal) {
+let hours = 0;
+if (locals["EndTimeVal"] && locals["StartTimeVal"]) {
   const finishTime = moment(EndTimeVal, "HH:mm");
-  console.log(finishTime);
   const startTime = moment(StartTimeVal, "HH:mm");
-  console.log(startTime);
   const duration = finishTime.diff(startTime);
-  console.log(duration);
-  let hours = +((duration / 1000 / 60 / 60).toFixed(2));
-  if (LunchBreakVal) {
+  hours = +((duration / 1000 / 60 / 60).toFixed(2));
+  if (!!locals["LunchBreakVal"]) {
     hours = hours - 0.5;
   }
-%>
-<%= hours %>
-<% } %>
+}
+_%>
+<%= hours _%>
 `,
           "watch": {
-            "Time-DjYudWTxQqnu7KjkY":"Time-DjYudWTxQqnu7KjkY",
-            "Time-q96RbJREypkwDoxp3":"Time-q96RbJREypkwDoxp3",
-            "Checkbox-g6HFGjYDqnbtC6eT5":"Checkbox-g6HFGjYDqnbtC6eT5"
+            "EndTimeVal":"Time-DjYudWTxQqnu7KjkY",
+            "StartTimeVal":"Time-q96RbJREypkwDoxp3",
+            "LunchBreakVal":"Checkbox-g6HFGjYDqnbtC6eT5"
           },
           "required": false,
           "propertyOrder": 77
