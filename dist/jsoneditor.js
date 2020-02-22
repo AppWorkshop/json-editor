@@ -9156,9 +9156,9 @@ JSONEditor.defaults.templates.jexl = function() {
   // ms as 00).
   window.jexl.addTransform("timeToEpochHHmm", function (HHmmString) { // , ...args as 3rd param
     if (window.moment) {
-      if (typeof window.moment.prototype["transform"] === "function") {
+      if (typeof window.moment.prototype.transform === "function") {
         if (/^[0-2][0-9]:[0-5][0-9]$/.test(HHmmString)) { // if it's a sort-of-valid HH:mm string
-          return moment(0)
+          return window.moment(0)
             .transform(HHmmString, "HH:mm")
             .valueOf();
         } // else return undefined
