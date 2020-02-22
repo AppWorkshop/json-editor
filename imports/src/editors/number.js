@@ -21,6 +21,7 @@ JSONEditor.defaults.editors.number = JSONEditor.defaults.editors.string.extend({
                 self.input.select();
             }
         });
+        self.input.setAttribute("inputmode","decimal")
 
     }
 });

@@ -2542,6 +2542,17 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
       else if (this.format !== "geolocation") {
         this.input_type = this.format;
         this.input = this.theme.getFormInputField(this.input_type);
+
+        if (this.format === "number") {
+          var eventName = 'focus'; // use onchange for select events, onclick for checkbox
+          this.input.addEventListener(eventName, function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            //When a numeric-ish string input is given focus, select all so new values don't prefix the redundant 0, default value
+            self.input.select();
+          });
+          self.input.setAttribute("inputmode", "decimal")
+        }
       }
     }
     // Normal text input
@@ -2930,11 +2941,16 @@ JSONEditor.defaults.editors.number = JSONEditor.defaults.editors.string.extend({
                 self.input.select();
             }
         });
+        self.input.setAttribute("inputmode","decimal")
 
     }
 });
 
 JSONEditor.defaults.editors.integer = JSONEditor.defaults.editors.number.extend({
+  build: function () {
+    this._super();
+    this.input.setAttribute("inputmode","numeric");
+  },
   sanitize: function(value) {
     value = value + "";
     return value.replace(/[^0-9\-]/g,'');
@@ -7384,7 +7400,7 @@ JSONEditor.AbstractTheme = Class.extend({
     return el;
   },
   setGridColumnSize: function(el,size) {
-    
+
   },
   getLink: function(text) {
     var el = document.createElement('a');
@@ -7427,7 +7443,7 @@ JSONEditor.AbstractTheme = Class.extend({
     else {
       el.appendChild(text);
     }
-    
+
     return el;
   },
   getCheckbox: function(name, checked) {
@@ -7435,7 +7451,7 @@ JSONEditor.AbstractTheme = Class.extend({
     checkbox.setAttribute("name",name);
     checkbox.setAttribute("value","true");
     if (checked) {
-      checkbox.setAttribute("checked",false); 
+      checkbox.setAttribute("checked",false);
     }
     return checkbox;
   },
@@ -7445,7 +7461,7 @@ JSONEditor.AbstractTheme = Class.extend({
     radio.setAttribute("value",value);
     radio.setAttribute("class","radio");
     if (checked) {
-     radio.setAttribute("checked",true); 
+     radio.setAttribute("checked",true);
     }
     return radio;
   },
@@ -7459,7 +7475,7 @@ JSONEditor.AbstractTheme = Class.extend({
       var uuid = $uuid();
       radio.setAttribute("id",uuid);
       radioLabel.setAttribute("for",uuid);
-      
+
       holder.appendChild(radioLabel);
       holder.appendChild(radio);
     }
@@ -7540,10 +7556,13 @@ JSONEditor.AbstractTheme = Class.extend({
   getFormInputField: function(type) {
     var el = document.createElement('input');
     el.setAttribute('type',type);
+    if (type === "number") {
+      el.setAttribute("inputmode","decimal")
+    }
     return el;
   },
   afterInputReady: function(input) {
-    
+
   },
   getFormControl: function(label, input, description) {
     var el = document.createElement('div');
@@ -7555,7 +7574,7 @@ JSONEditor.AbstractTheme = Class.extend({
     else {
       el.appendChild(input);
     }
-    
+
     if(description) el.appendChild(description);
     return el;
   },

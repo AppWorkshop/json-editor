@@ -388,6 +388,17 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
       else if (this.format !== "geolocation") {
         this.input_type = this.format;
         this.input = this.theme.getFormInputField(this.input_type);
+
+        if (this.format === "number") {
+          var eventName = 'focus'; // use onchange for select events, onclick for checkbox
+          this.input.addEventListener(eventName, function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            //When a numeric-ish string input is given focus, select all so new values don't prefix the redundant 0, default value
+            self.input.select();
+          });
+          self.input.setAttribute("inputmode", "decimal")
+        }
       }
     }
     // Normal text input

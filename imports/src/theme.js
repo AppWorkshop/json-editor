@@ -57,7 +57,7 @@ JSONEditor.AbstractTheme = Class.extend({
     return el;
   },
   setGridColumnSize: function(el,size) {
-    
+
   },
   getLink: function(text) {
     var el = document.createElement('a');
@@ -100,7 +100,7 @@ JSONEditor.AbstractTheme = Class.extend({
     else {
       el.appendChild(text);
     }
-    
+
     return el;
   },
   getCheckbox: function(name, checked) {
@@ -108,7 +108,7 @@ JSONEditor.AbstractTheme = Class.extend({
     checkbox.setAttribute("name",name);
     checkbox.setAttribute("value","true");
     if (checked) {
-      checkbox.setAttribute("checked",false); 
+      checkbox.setAttribute("checked",false);
     }
     return checkbox;
   },
@@ -118,7 +118,7 @@ JSONEditor.AbstractTheme = Class.extend({
     radio.setAttribute("value",value);
     radio.setAttribute("class","radio");
     if (checked) {
-     radio.setAttribute("checked",true); 
+     radio.setAttribute("checked",true);
     }
     return radio;
   },
@@ -132,7 +132,7 @@ JSONEditor.AbstractTheme = Class.extend({
       var uuid = $uuid();
       radio.setAttribute("id",uuid);
       radioLabel.setAttribute("for",uuid);
-      
+
       holder.appendChild(radioLabel);
       holder.appendChild(radio);
     }
@@ -213,10 +213,13 @@ JSONEditor.AbstractTheme = Class.extend({
   getFormInputField: function(type) {
     var el = document.createElement('input');
     el.setAttribute('type',type);
+    if (type === "number") {
+      el.setAttribute("inputmode","decimal")
+    }
     return el;
   },
   afterInputReady: function(input) {
-    
+
   },
   getFormControl: function(label, input, description) {
     var el = document.createElement('div');
@@ -228,7 +231,7 @@ JSONEditor.AbstractTheme = Class.extend({
     else {
       el.appendChild(input);
     }
-    
+
     if(description) el.appendChild(description);
     return el;
   },
