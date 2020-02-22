@@ -7,10 +7,16 @@
     <!-- placeholders for the theme switcher -->
     <link rel='stylesheet' id='theme_stylesheet'>
     <link rel='stylesheet' id='icon_stylesheet'>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" type="text/css">
     <style>[class*="foundicon-"] {font-family: GeneralFoundicons;font-style: normal;}</style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js" integrity="sha256-VeNaFBVDhoX3H+gJ37DpT/nTuZTdjYro9yBruHjVmoQ=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js" integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ejs@3.0.1/ejs.js"></script>
     <script src='dist/jsoneditor.js'></script>
     <!-- This library is used to provide direct links to the demo.  It is not required for JSON Editor -->
     <script src='https://cdn.rawgit.com/pieroxy/lz-string/master/libs/lz-string.min.js'></script>
@@ -145,13 +151,16 @@ editor.on("change",  function() {
       </div>
     </div>
     <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css">
 
+    <script>
+      window.EJS = ejs;
+    </script>
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.5/js/materialize.min.js"></script>
-    <script src="http://szimek.github.io/signature_pad/js/signature_pad.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@2.3.2/dist/signature_pad.min.js"></script>
+
     <script>
       (function () {
         var schema;
@@ -166,239 +175,402 @@ editor.on("change",  function() {
 
         // Default starting schema
         if (!schema) {
+
           schema = {
-              "form_id": 1,
-              "type": "object",
-              "title": "Inclusion / Exclusion Data",
-              "formNumber": "FM000-02",
-              "properties": {
-                  "patientID": {
-                      "type": "string",
-                      "title": "Patient ID",
-                      "format": "string",
-                      "default": "currentPatientID",
-                      "readonly": true
+            "form_id": 1,
+            "type": "object",
+            "title": "Inclusion / Exclusion Data",
+            "formNumber": "FM000-02",
+            "properties": {
+              "patientID": {
+                "type": "string",
+                "title": "Patient ID",
+                "format": "string",
+                "default": "currentPatientID",
+                "readonly": true
+              },
+              "imgData": {
+                "title": "Simpsons Imaginary",
+                "type": "string",
+                "media": {
+                  "binaryEncoding": "base64",
+                  "type": "image/png"
+                }
+              },
+              "bleeding_diathesis-2": {
+                "name": "Multiple Choice",
+                "show": true,
+                "propertyOrder": 21,
+                "icon": "circle-o",
+                "title": "Bleeding diathesis",
+                "type": "radio",
+                "format": "radio",
+                "description": "",
+                "required": true,
+                "default": "",
+                "field_options": [
+                  {
+                    "option_id": 1,
+                    "option_value": "Yes"
                   },
-                "imgData": {
-                  "title": "Simpsons Imaginary",
-                  "type": "string",
-                  "media": {
-                    "binaryEncoding": "base64",
-                    "type": "image/png"
+                  {
+                    "option_id": 2,
+                    "option_value": "No"
+                  }
+                ],
+                "enum": [
+                  "Yes",
+                  "No"
+                ],
+              },
+              "type_of_problem-1": {
+                "name": "Text",
+                "show": true,
+                "propertyOrder": 21,
+                "icon": "font",
+                "title": "Type of Problem",
+                "type": "string",
+                "format": "text",
+                "description": "",
+                "required": true,
+                "default": "",
+                "requiredIf": {
+                  "propertyPath": "bleeding_diathesis-2",
+                  "propertyPathMatches": {
+                    "matchType": "string",
+                    "matchExpression": "Yes"
+                  },
+                  "hideOtherwise": true,
+                  "disableOtherwise": true
+                }
+              },
+              "ffp_or_prothrombinex_in_5_days_preop-3": {
+                "name": "Multiple Choice",
+                "show": true,
+                "propertyOrder": 21,
+                "icon": "circle-o",
+                "title": "FFP or Prothrombinex in 5 days preop?",
+                "type": "radio",
+                "format": "radio",
+                "description": "",
+                "required": true,
+                "default": "",
+                "field_options": [
+                  {
+                    "option_id": 1,
+                    "option_value": "Yes"
+                  },
+                  {
+                    "option_id": 2,
+                    "option_value": "No"
+                  }
+                ],
+                "enum": [
+                  "Yes",
+                  "No"
+                ],
+              },
+              "last_clopidogrelprasugrelticlodipine-4": {
+                "name": "Text",
+                "show": true,
+                "propertyOrder": 21,
+                "icon": "font",
+                "title": "Last Clopidogrel/Prasugrel/Ticlodipine",
+                "type": "string",
+                "format": "number",
+                "description": "Number of days ago",
+                "default": "",
+              },
+              "last_aspirin-5": {
+                "name": "Text",
+                "show": true,
+                "propertyOrder": 21,
+                "icon": "font",
+                "title": "Last Aspirin",
+                "type": "string",
+                "format": "number",
+                "description": "Number of days ago",
+                "default": "",
+              },
+              "operation_type-7": {
+                "name": "Dropdown",
+                "show": true,
+                "propertyOrder": 22,
+                "icon": "caret-down",
+                "title": "Operation Type",
+                "description": "Select all that apply",
+                "type": "array",
+                "format": "select",
+                "required": true,
+                "multiple": true,
+                "default": [],
+                "field_options": [
+                  {
+                    "option_id": 1,
+                    "option_value": "heart transplant"
+                  },
+                  {
+                    "option_id": 2,
+                    "option_value": "lung transplant"
+                  },
+                  {
+                    "option_id": 3,
+                    "option_value": "cabg"
+                  },
+                  {
+                    "option_id": 4,
+                    "option_value": "valve"
+                  },
+                  {
+                    "option_id": 5,
+                    "option_value": "aortic root"
+                  },
+                  {
+                    "option_id": 6,
+                    "option_value": "aortic arch"
+                  },
+                  {
+                    "option_id": 7,
+                    "option_value": "aortic dissection"
+                  },
+                  {
+                    "option_id": 8,
+                    "option_value": "other"
+                  }
+                ],
+                "enum": [
+                  "heart transplant",
+                  "lung transplant",
+                  "cabg",
+                  "valve",
+                  "aortic root",
+                  "aortic arch",
+                  "aortic dissection",
+                  "other"
+                ],
+              },
+              "type_of_operation-1": {
+                "name": "Text",
+                "show": true,
+                "propertyOrder": 22,
+                "icon": "font",
+                "title": "Type of Operation",
+                "type": "string",
+                "format": "text",
+                "description": "",
+                "default": "",
+                "requiredIf": {
+                  "propertyPath": "./operation_type-7",
+                  "propertyPathMatches": {
+                    "matchType": "oneOfSelected",
+                    "matchExpression": [
+                      "other"
+                    ]
+                  },
+                  "propertyPathIsRelative": true,
+                  "hideOtherwise": true,
+                  "disableOtherwise": true
+                }
+              },
+              "Dropdown-nj64haTYxDEveXBpC" : {
+                "_id" : "nj64haTYxDEveXBpC",
+                "type" : "string",
+                "title" : "Equipment ID",
+                "format" : "select",
+                "required" : true,
+                "emptyFirstField" : true,
+                "propertyOrder" : 31,
+                "enum" : [
+                  "GR03",
+                  "GR04",
+                  "GR05",
+                  "GR06",
+                  "GR07",
+                  "GR08",
+                  "GR09",
+                  "GR10",
+                  "GR11",
+                  "GR12",
+                  "GR13",
+                  "GR14",
+                  "WL01",
+                  "WL02",
+                  "WL03",
+                  "WL04",
+                  "WC01",
+                  "WC03",
+                  "RM001",
+                  "BC01",
+                  "DZ01",
+                  "DZ02",
+                  "TK07",
+                  "LL02",
+                  "LV04",
+                  "LV09",
+                  "LV010",
+                  "LV011",
+                  "LV012",
+                  "LV014",
+                  "LV015",
+                  "LV016",
+                  "LV017",
+                  "LV018",
+                  "TR01",
+                  "TR03",
+                  "LT01",
+                  "AT1",
+                  "AT2",
+                  "AT3",
+                  "CD01",
+                  "FITTER",
+                  "CLIENT MACHINE",
+                  "TRAINING"
+                ]
+              },
+              "Date-a8RnkuaBMCsSkyhWB" : {
+                "_id" : "a8RnkuaBMCsSkyhWB",
+                "type" : "string",
+                "title" : "Entry Date",
+                "format" : "date",
+                "required" : true,
+                "minLength" : 10,
+                "maxLength" : 10,
+                "propertyOrder" : 32,
+                "options" : {
+                  "flatpickr" : {
+                    "dateFormat" : "Y-m-d",
+                    "enableTime" : false,
+                    "noCalendar" : false,
+                    "mode" : "single"
+                  }
+                }
+              },
+              "Time-yc74huCbFxjfHgYvw" : {
+                "_id" : "yc74huCbFxjfHgYvw",
+                "type" : "string",
+                "title" : "Start Time",
+                "format" : "time",
+                "options" : {
+                  "flatpickr" : {
+                    "dateFormat" : "H:i",
+                    "enableTime" : true,
+                    "noCalendar" : true,
+                    "mode" : "single"
                   }
                 },
-                  "bleeding_diathesis-2": {
-                      "field_type": "radio",
-                      "demoTemplateUrl": "./views/directive-templates/field/radio.html",
-                      "editTemplateUrl": "./views/directive-templates/edit/options.html",
-                      "name": "Multiple Choice",
-                      "show": true,
-                      "displayOrder": 21,
-                      "icon": "circle-o",
-                      "field_id": "bleeding_diathesis-2",
-                      "title": "Bleeding diathesis",
-                      "type": "radio",
-                      "format": "radio",
-                      "description": "",
-                      "required": true,
-                      "default": "",
-                      "field_options": [
-                          {
-                              "option_id": 1,
-                              "option_value": "Yes"
-                          },
-                          {
-                              "option_id": 2,
-                              "option_value": "No"
-                          }
-                      ],
-                      "enum": [
-                          "Yes",
-                          "No"
-                      ],
-                      "id": 2
-                  },
-                  "type_of_problem-1": {
-                      "field_type": "textfield",
-                      "demoTemplateUrl": " ./views/directive-templates/field/normal-text.html",
-                      "editTemplateUrl": "./views/directive-templates/edit/normal-text.html",
-                      "name": "Text",
-                      "show": true,
-                      "displayOrder": 1,
-                      "icon": "font",
-                      "field_id": "type_of_problem-1",
-                      "title": "Type of Problem",
-                      "type": "string",
-                      "format": "text",
-                      "description": "",
-                      "required": true,
-                      "default": "",
-                      "id": 1,
-                      "requiredIf": {
-                          "propertyPath": "bleeding_diathesis-2",
-                          "propertyPathMatches": {
-                              "matchType": "string",
-                              "matchExpression": "Yes"
-                          },
-                          "hideOtherwise": true,
-                          "disableOtherwise": true
-                      }
-                  },
-                  "ffp_or_prothrombinex_in_5_days_preop-3": {
-                      "field_type": "radio",
-                      "demoTemplateUrl": "./views/directive-templates/field/radio.html",
-                      "editTemplateUrl": "./views/directive-templates/edit/options.html",
-                      "name": "Multiple Choice",
-                      "show": true,
-                      "displayOrder": 21,
-                      "icon": "circle-o",
-                      "field_id": "ffp_or_prothrombinex_in_5_days_preop-3",
-                      "title": "FFP or Prothrombinex in 5 days preop?",
-                      "type": "radio",
-                      "format": "radio",
-                      "description": "",
-                      "required": true,
-                      "default": "",
-                      "field_options": [
-                          {
-                              "option_id": 1,
-                              "option_value": "Yes"
-                          },
-                          {
-                              "option_id": 2,
-                              "option_value": "No"
-                          }
-                      ],
-                      "enum": [
-                          "Yes",
-                          "No"
-                      ],
-                      "id": 3
-                  },
-                  "last_clopidogrelprasugrelticlodipine-4": {
-                      "field_type": "textfield",
-                      "demoTemplateUrl": " ./views/directive-templates/field/normal-text.html",
-                      "editTemplateUrl": "./views/directive-templates/edit/normal-text.html",
-                      "name": "Text",
-                      "show": true,
-                      "displayOrder": 1,
-                      "icon": "font",
-                      "field_id": "last_clopidogrelprasugrelticlodipine-4",
-                      "title": "Last Clopidogrel/Prasugrel/Ticlodipine",
-                      "type": "string",
-                      "format": "number",
-                      "description": "Number of days ago",
-                      "default": "",
-                      "id": 4
-                  },
-                  "last_aspirin-5": {
-                      "field_type": "textfield",
-                      "demoTemplateUrl": " ./views/directive-templates/field/normal-text.html",
-                      "editTemplateUrl": "./views/directive-templates/edit/normal-text.html",
-                      "name": "Text",
-                      "show": true,
-                      "displayOrder": 1,
-                      "icon": "font",
-                      "field_id": "last_aspirin-5",
-                      "title": "Last Aspirin",
-                      "type": "string",
-                      "format": "number",
-                      "description": "Number of days ago",
-                      "default": "",
-                      "id": 5
-                  },
-                  "operation_type-7": {
-                      "field_type": "dropdown",
-                      "demoTemplateUrl": "./views/directive-templates/field/dropdown.html",
-                      "editTemplateUrl": "./views/directive-templates/edit/options.html",
-                      "name": "Dropdown",
-                      "show": true,
-                      "displayOrder": 22,
-                      "icon": "caret-down",
-                      "field_id": "operation_type-7",
-                      "title": "Operation Type",
-                      "description": "Select all that apply",
-                      "type": "array",
-                      "format": "select",
-                      "required": true,
-                      "multiple": true,
-                      "default": [],
-                      "field_options": [
-                          {
-                              "option_id": 1,
-                              "option_value": "heart transplant"
-                          },
-                          {
-                              "option_id": 2,
-                              "option_value": "lung transplant"
-                          },
-                          {
-                              "option_id": 3,
-                              "option_value": "cabg"
-                          },
-                          {
-                              "option_id": 4,
-                              "option_value": "valve"
-                          },
-                          {
-                              "option_id": 5,
-                              "option_value": "aortic root"
-                          },
-                          {
-                              "option_id": 6,
-                              "option_value": "aortic arch"
-                          },
-                          {
-                              "option_id": 7,
-                              "option_value": "aortic dissection"
-                          },
-                          {
-                              "option_id": 8,
-                              "option_value": "other"
-                          }
-                      ],
-                      "enum": [
-                          "heart transplant",
-                          "lung transplant",
-                          "cabg",
-                          "valve",
-                          "aortic root",
-                          "aortic arch",
-                          "aortic dissection",
-                          "other"
-                      ],
-                      "id": 7
-                  },
-                  "type_of_operation-1": {
-                      "field_type": "textfield",
-                      "demoTemplateUrl": " ./views/directive-templates/field/normal-text.html",
-                      "editTemplateUrl": "./views/directive-templates/edit/normal-text.html",
-                      "name": "Text",
-                      "show": true,
-                      "displayOrder": 1,
-                      "icon": "font",
-                      "field_id": "type_of_operation-1",
-                      "title": "Type of Operation",
-                      "type": "string",
-                      "format": "text",
-                      "description": "",
-                      "default": "",
-                      "id": 1,
-                      "requiredIf": {
-                          "propertyPath": "./operation_type-7",
-                          "propertyPathMatches": {
-                              "matchType": "oneOfSelected",
-                              "matchExpression": [
-                                  "other"
-                              ]
-                          },
-                          "propertyPathIsRelative": true,
-                          "hideOtherwise": true,
-                          "disableOtherwise": true
-                      }
+                "required" : true,
+                "minLength" : 5,
+                "maxLength" : 5,
+                "propertyOrder" : 33
+              },
+              "Time-d3HYQE8CqrMbnL77S" : {
+                "_id" : "d3HYQE8CqrMbnL77S",
+                "type" : "string",
+                "title" : "End Time",
+                "format" : "time",
+                "options" : {
+                  "flatpickr" : {
+                    "dateFormat" : "H:i",
+                    "enableTime" : true,
+                    "noCalendar" : true,
+                    "mode" : "single"
                   }
+                },
+                "required" : true,
+                "minLength" : 5,
+                "maxLength" : 5,
+                "propertyOrder" : 34
+              },
+              "Checkbox-Zt9pavwKpYMNPfCdr" : {
+                "_id" : "Zt9pavwKpYMNPfCdr",
+                "type" : "boolean",
+                "title" : "Lunch Break **If you are working through lunch break please note this on your Daily Hire Docket**",
+                "description" : "(30 minutes)",
+                "format" : "checkbox",
+                "required" : false,
+                "propertyOrder" : 37
+              },
+              "Text-rgyjvqrhux8R9NL2w" : {
+                "_id" : "rgyjvqrhux8R9NL2w",
+                "type" : "string",
+                "title" : "Total Hours",
+                "description" : "(calculated automatically)",
+                "required" : false,
+                "propertyOrder" : 38,
+                "information_only" : false,
+                "isCalculated" : true,
+                "template" : "<%_\nlet hours = 0;\nif (locals[\"EndTimeVal\"] && locals[\"StartTimeVal\"]) {\n  //const EndTimeVal = locals[\"Time-DjYudWTxQqnu7KjkY\"];\n  //const StartTimeVal = locals[\"Time-q96RbJREypkwDoxp3\"];\n  //const LunchBreakVal = locals[\"Checkbox-g6HFGjYDqnbtC6eT5\"]\n\n  if (EndTimeVal && StartTimeVal) {\n    const finishTime = moment(EndTimeVal, \"HH:mm\");\n    const startTime = moment(StartTimeVal, \"HH:mm\");\n    const duration = finishTime.diff(startTime);\n    hours = +((duration / 1000 / 60 / 60).toFixed(2));\n  }\n}\n\nif (locals[\"LunchBreakVal\"] && LunchBreakVal) {\n  hours = hours - 0.5;\n}\n\nif (hours < 0) hours = 0;\n_%>\n<%= hours _%>",
+                "watch" : {
+                  "EndTimeVal" : "Time-d3HYQE8CqrMbnL77S",
+                  "StartTimeVal" : "Time-yc74huCbFxjfHgYvw",
+                  "LunchBreakVal" : "Checkbox-Zt9pavwKpYMNPfCdr"
+                }
+              },
+              "Number-RyLbGBrapcjQ6YyA7" : {
+                "_id" : "RyLbGBrapcjQ6YyA7",
+                "type" : "string",
+                "format" : "number",
+                "title" : "Start Machine Hours",
+                "required" : true,
+                "propertyOrder" : 39
+              },
+              "Number-q9brjSfQ5wDs5v6du" : {
+                "_id" : "q9brjSfQ5wDs5v6du",
+                "type" : "string",
+                "format" : "number",
+                "title" : "End Machine Hours",
+                "required" : true,
+                "propertyOrder" : 40
+              },
+              "Text-uWirrWkdQ9dfkNGDY" : {
+                "_id" : "uWirrWkdQ9dfkNGDY",
+                "type" : "string",
+                "title" : "Total Machine Hours",
+                "description" : "(calculated automatically)",
+                "required" : false,
+                "propertyOrder" : 41,
+                "information_only" : false,
+                "isCalculated" : true,
+                "template" : "<%_\nlet hours = 0;\nif (locals[\"StartMachineHoursVal\"] && locals[\"EndMachineHoursVal\"]) { // deal with field \n  hours = EndMachineHoursVal - StartMachineHoursVal;\n}\n_%>\n<%= hours _%>",
+                "watch" : {
+                  "StartMachineHoursVal" : "Number-RyLbGBrapcjQ6YyA7",
+                  "EndMachineHoursVal" : "Number-q9brjSfQ5wDs5v6du"
+                }
+              },
+              "Paragraph-zmLJszBwwmnGRvENp" : {
+                "_id" : "zmLJszBwwmnGRvENp",
+                "type" : "string",
+                "title" : "Notes",
+                "description" : "(optional)",
+                "format" : "textarea",
+                "required" : false,
+                "propertyOrder" : 42,
+                "information_only" : false
+              },
+              "Dropdown-qfZyW3QNgLiBx6Mmy" : {
+                "_id" : "qfZyW3QNgLiBx6Mmy",
+                "type" : "string",
+                "title" : "Site",
+                "format" : "select",
+                "required" : true,
+                "emptyFirstField" : true,
+                "propertyOrder" : 43,
+                "enum" : [
+                  "NRW - Eliwana",
+                  "NRW - Koodaideri",
+                  "NRW - Iron Bridge",
+                  "MACA - Iron Bridge",
+                  "BGC - West Angeles",
+                  "DECMIL - Reid Hwy",
+                  "DECMIL - Yandin Wind Farm",
+                  "Odell Office",
+                  "Workshop",
+                  "CPB - North Link 3",
+                  "DECMIL - WBHO Muchea"
+                ]
               }
-          };
+            }
+          }
         }
 
         // Divs/textareas on the page
@@ -443,7 +615,8 @@ editor.on("change",  function() {
             jsoneditor.destroy();
           jsoneditor = new JSONEditor($editor, {
             schema: schema,
-            startval: startval
+            startval: startval,
+            template: "ejs"
           });
           window.jsoneditor = jsoneditor;
 
